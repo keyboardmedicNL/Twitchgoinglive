@@ -273,6 +273,8 @@ while True:
                 messageidfromfile = readmessageid(streamer)
                 webhookdelete(messageidfromfile)
                 removemessageidfile(streamer)
+    print(f"waiting for {checktime} minutes")
+    discordremotelog("Goinglivebot",14081792,f"waiting for {checktime} minutes")
     time.sleep(checktime*60)
 
 

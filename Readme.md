@@ -1,5 +1,5 @@
 # what is it
-a simple script that polls a list of twitch channels and posts a message to a discord webhook when they are live with a thumbnail and such. updates the message on a predefined schedule and deletes message when the stream goes offline
+a simple script that polls a list of twitch channels and posts a message to a discord webhook when they are live with a thumbnail and such. updates the message on a predefined schedule and deletes message when the stream goes offline, cleans up all old messages on restart to avoid double posts when the bot crashes.
 
 ![Alt text](screenshot.png?raw=true "Title")
 
