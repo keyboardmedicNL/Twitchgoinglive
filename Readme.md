@@ -28,7 +28,8 @@ included are a local webserver for monitoring purposes and a post script that ca
 }
 
 ```
-3. run the script
+3. create a token.txt and place it in the config folder, leave the file empty (stopgap solution, will be fixed later)
+4. run the script
 
 * alternativly you can either build your own docker image with the included dockerfile or use mine with the following command
 ```
