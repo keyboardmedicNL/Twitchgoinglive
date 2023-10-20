@@ -32,7 +32,7 @@ included are a local webserver for monitoring purposes and a post script that ca
 
 * alternativly you can either build your own docker image with the included dockerfile or use mine with the following command
 ```
-docker run -itd --name twitchgoinglive -v /path/to/config:/usr/src/app/config keyboardmedic/twitchgoinglive:latest
+docker run -it -d --name twitchgoinglive -v /path/to/config:/usr/src/app/config keyboardmedic/twitchgoinglive:latest
 ```
 
 # disclaimer
