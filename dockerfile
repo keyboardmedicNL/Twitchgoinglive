@@ -7,4 +7,4 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . .
 
-CMD [ "python", "./clipbot.py" ]
+CMD [ "python", "./goinglive.py" ]
