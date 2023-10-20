@@ -227,6 +227,8 @@ while postcheck == False: # loop to ensure post gets loaded
                 postcheck = True # stops loop if succesfull
                 print("starting post server for remote monitoring")
                 discordremotelog("Goinglivebot",14081792,"starting post server for remote monitoring")
+            else:
+                postcheck = True # stops loop if succesfull
     except Exception as e: # catches exception
         print(f"An exception occurred whilst trying to start the post server: {str(e)} waiting for 1 minute")
         discordremotelog("Goinglivebot",10159108,f"An exception occurred whilst trying to start the post server: {str(e)} waiting for 1 minute")
