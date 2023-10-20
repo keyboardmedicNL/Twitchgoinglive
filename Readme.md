@@ -1,6 +1,8 @@
 # what is it
 a simple script that polls a list of twitch channels and posts a message to a discord webhook when they are live with a thumbnail and such. updates the message on a predefined schedule and deletes message when the stream goes offline
 
+![Alt text](screenshot.png?raw=true "Title")
+
 included are a local webserver for monitoring purposes and a post script that can talk to a remote monitoring server (both can be disabled by leaving their url entry empty)
 
 # how to use
