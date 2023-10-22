@@ -236,17 +236,20 @@ while postcheck == False: # loop to ensure post gets loaded
 
 #opens file to get auth token
 while tokenCheck == False:
-    try:
-        with open("config/token.txt", 'r') as file2:
-            tokenRaw = str(file2.readline())
-            token = tokenRaw.strip()
-        tokenCheck = True
-        print ("Token to use for auth: " + token)
-        discordremotelog("Goinglivebot",14081792,"auth token loaded succesfully")
-    except Exception as e:
-        print(f"An exception occurred whilst trying to read the tokenfile: {str(e)} waiting for 1 minute")
-        discordremotelog("Goinglivebot",10159108,f"An exception occurred whilst trying to read the tokenfile: {str(e)} waiting for 1 minute")
-        time.sleep(60)
+    if exists(f"config/token.txt"):
+        try:
+            with open("config/token.txt", 'r') as file2:
+                tokenRaw = str(file2.readline())
+                token = tokenRaw.strip()
+            tokenCheck = True
+            print ("Token to use for auth: " + token)
+            discordremotelog("Goinglivebot",14081792,"auth token loaded succesfully")
+        except Exception as e:
+            print(f"An exception occurred whilst trying to read the tokenfile: {str(e)} waiting for 1 minute")
+            discordremotelog("Goinglivebot",10159108,f"An exception occurred whilst trying to read the tokenfile: {str(e)} waiting for 1 minute")
+            time.sleep(60)
+    else:
+        gettoken()
 
 # ===== main code =====
 # cleans up old messages on start
