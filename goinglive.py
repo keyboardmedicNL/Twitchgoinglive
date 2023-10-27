@@ -188,7 +188,6 @@ with open("config/config.json") as config:
     webhookmonitorurl = configJson["webhookmonitorurl"]
     checktime = configJson["checktime"]
     config.close()
-configfile = True # stops loop when loaded succesfully
 discordremotelog("Goinglivebot",14081792,"succesfully loaded config")
 print("succesfully loaded config")
 
@@ -206,7 +205,6 @@ if webhookmonitorurl != "":
         call(["python", "post.py"])
     processThread = threading.Thread(target=thread_third)
     processThread.start()
-    postcheck = True # stops loop if succesfull
     print("starting post server for remote monitoring")
     discordremotelog("Goinglivebot",14081792,"starting post server for remote monitoring")
 
@@ -215,7 +213,6 @@ if exists(f"config/token.txt"):
     with open("config/token.txt", 'r') as file2:
         tokenRaw = str(file2.readline())
         token = tokenRaw.strip()
-    tokenCheck = True
     print ("Token to use for auth: " + token)
     discordremotelog("Goinglivebot",14081792,"auth token loaded succesfully")
 else:
