@@ -253,7 +253,7 @@ while True:
                     webhookdelete(messageidfromfile)
                     removemessageidfile(streamer)
         print(f"waiting for {checktime*60} minutes")
-        discordremotelog("Goinglivebot",14081792,f"waiting for {checktime*60} minutes")
+        discordremotelog("Goinglivebot",14081792,f"waiting for {checktime} minutes")
     except Exception as e:
         print("An exception occurred: ", str(e))
     print()
