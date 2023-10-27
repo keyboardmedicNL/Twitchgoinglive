@@ -19,7 +19,7 @@ included are a local webserver for monitoring purposes and a post script that ca
     "posttimeout": "timeout in minutes to send message to monitoring server",
     "checktime": time in minutes between polls,
     "hostname": "adress for local webserver",
-    "webport": port for local webserver,
+    "webport": port for local webserver
 }
 
 ```
