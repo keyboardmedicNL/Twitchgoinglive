@@ -23,7 +23,7 @@ included are a local webserver for monitoring purposes and a post script that ca
 }
 
 ```
-3. create a streamers.txt file and add every streamer you want to poll on a new line
+3. create a streamers.txt file in the config folder and add every streamer you want to poll on a new line
 4. run the script
 
 * alternativly you can either build your own docker image with the included dockerfile or use mine with the following command
