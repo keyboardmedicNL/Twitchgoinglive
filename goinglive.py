@@ -216,7 +216,7 @@ if exists(f"config/token.txt"):
     print ("Token to use for auth: " + token)
     discordremotelog("Goinglivebot",14081792,"auth token loaded succesfully")
 else:
-    gettoken()
+    token = gettoken()
 
 # ===== main code =====
 # cleans up old messages on start
