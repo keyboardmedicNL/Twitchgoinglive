@@ -20,15 +20,10 @@ included are a local webserver for monitoring purposes and a post script that ca
     "checktime": time in minutes between polls,
     "hostname": "adress for local webserver",
     "webport": port for local webserver,
-    "streamers": [
-    "streamer1",
-    "streamer2",
-    "streamer3"
-    ]
 }
 
 ```
-3. create a token.txt and place it in the config folder, leave the file empty (stopgap solution, will be fixed later)
+3. create a streamers.txt file and add every streamer you want to poll on a new line
 4. run the script
 
 * alternativly you can either build your own docker image with the included dockerfile or use mine with the following command
