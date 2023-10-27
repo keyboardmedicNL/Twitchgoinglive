@@ -6,11 +6,6 @@ from subprocess import call
 from os.path import exists
 import os
 
-# ===== variables used in script =====
-webservercheck=False
-postcheck=False
-tokenCheck=False
-
 # ===== webhook functions =====
 # webhook send to discord for goinglive message
 def webhooksend(rr):
@@ -156,6 +151,7 @@ def discordremotelog(title,color,description):
                 }
             ]}
         rl = requests.post(webhooklogurl, json=data)
+        time.sleep(1)
 
 # saves streamid to file
 def savemessageid(name,messageid):
@@ -190,7 +186,6 @@ with open("config/config.json") as config:
     webhookurl = configJson["webhookurl"]
     webhooklogurl = configJson["webhooklogurl"]
     webhookmonitorurl = configJson["webhookmonitorurl"]
-    streamers = configJson["streamers"]
     checktime = configJson["checktime"]
     config.close()
 configfile = True # stops loop when loaded succesfully
@@ -198,88 +193,73 @@ discordremotelog("Goinglivebot",14081792,"succesfully loaded config")
 print("succesfully loaded config")
 
 # webserver for local monitoring
-while webservercheck == False: # loop to ensure webserver gets loaded
-    try:
-        file_exists = exists("webserver.py")
-        if file_exists == True: # check added so exception actually triggers
-            def thread_second(): # start webserver.py as a second threat to allow it to run parallel with main script
-                call(["python", "webserver.py"])
-            processThread = threading.Thread(target=thread_second)
-            processThread.start()
-            webservercheck = True # stops loop if succesfull
-            print("starting webserver for local monitoring") 
-            discordremotelog("Goinglivebot",14081792,"starting webserver for local monitoring")
-    except Exception as e: 
-        print(f"An exception occurred whilst trying to start the webserver: {str(e)} waiting for 1 minute")
-        discordremotelog("Goinglivebot",10159108,f"An exception occurred whilst trying to start the webserver: {str(e)} waiting for 1 minute")
-        time.sleep(60)
+def thread_second(): # start webserver.py as a second threat to allow it to run parallel with main script
+    call(["python", "webserver.py"])
+processThread = threading.Thread(target=thread_second)
+processThread.start()
+print("starting webserver for local monitoring") 
+discordremotelog("Goinglivebot",14081792,"starting webserver for local monitoring")
 
 #post process to talk to remote monitor
-while postcheck == False: # loop to ensure post gets loaded
-    try:
-        file_exists = exists("post.py")
-        if file_exists == True: # check added so exception actually triggers
-            if webhookmonitorurl != "":
-                def thread_third(): # start post.py as a third threat to allow it to run parallel with main script
-                    call(["python", "post.py"])
-                processThread = threading.Thread(target=thread_third)
-                processThread.start()
-                postcheck = True # stops loop if succesfull
-                print("starting post server for remote monitoring")
-                discordremotelog("Goinglivebot",14081792,"starting post server for remote monitoring")
-            else:
-                postcheck = True # stops loop if succesfull
-    except Exception as e: # catches exception
-        print(f"An exception occurred whilst trying to start the post server: {str(e)} waiting for 1 minute")
-        discordremotelog("Goinglivebot",10159108,f"An exception occurred whilst trying to start the post server: {str(e)} waiting for 1 minute")
-        time.sleep(60)
+if webhookmonitorurl != "":
+    def thread_third(): # start post.py as a third threat to allow it to run parallel with main script
+        call(["python", "post.py"])
+    processThread = threading.Thread(target=thread_third)
+    processThread.start()
+    postcheck = True # stops loop if succesfull
+    print("starting post server for remote monitoring")
+    discordremotelog("Goinglivebot",14081792,"starting post server for remote monitoring")
 
 #opens file to get auth token
-while tokenCheck == False:
-    if exists(f"config/token.txt"):
-        try:
-            with open("config/token.txt", 'r') as file2:
-                tokenRaw = str(file2.readline())
-                token = tokenRaw.strip()
-            tokenCheck = True
-            print ("Token to use for auth: " + token)
-            discordremotelog("Goinglivebot",14081792,"auth token loaded succesfully")
-        except Exception as e:
-            print(f"An exception occurred whilst trying to read the tokenfile: {str(e)} waiting for 1 minute")
-            discordremotelog("Goinglivebot",10159108,f"An exception occurred whilst trying to read the tokenfile: {str(e)} waiting for 1 minute")
-            time.sleep(60)
-    else:
-        gettoken()
+if exists(f"config/token.txt"):
+    with open("config/token.txt", 'r') as file2:
+        tokenRaw = str(file2.readline())
+        token = tokenRaw.strip()
+    tokenCheck = True
+    print ("Token to use for auth: " + token)
+    discordremotelog("Goinglivebot",14081792,"auth token loaded succesfully")
+else:
+    gettoken()
 
 # ===== main code =====
 # cleans up old messages on start
+with open("config/streamers.txt", 'r') as streamerfile:
+    streamers = [line.rstrip() for line in streamerfile]
 for streamer in streamers:
     if exists(f"config/{streamer}.txt"):
         messageidfromfile = readmessageid(streamer)
         webhookdelete(messageidfromfile)
         removemessageidfile(streamer)
+print("removed old messages posted to webhook")
+discordremotelog("Goinglivebot",14081792,"removed old messages posted to webhook")
 
 # main loop
 while True:
-    for streamer in streamers:
-        rresponse,r,islive = getstream(streamer)
-        if "401" in str(rresponse):
-            token = gettoken()
+    try:
+        with open("config/streamers.txt", 'r') as streamerfile:
+            streamers = [line.rstrip() for line in streamerfile]
+        for streamer in streamers:
             rresponse,r,islive = getstream(streamer)
-        if islive == "live":
-            if exists(f"config/{streamer}.txt"):
-                messageidfromfile = readmessageid(streamer)
-                webhookedit(r,messageidfromfile)
+            if "401" in str(rresponse):
+                token = gettoken()
+                rresponse,r,islive = getstream(streamer)
+            if islive == "live":
+                if exists(f"config/{streamer}.txt"):
+                    messageidfromfile = readmessageid(streamer)
+                    webhookedit(r,messageidfromfile)
+                else:
+                    messageid = webhooksend(r)
+                    savemessageid(streamer,messageid)
             else:
-                messageid = webhooksend(r)
-                savemessageid(streamer,messageid)
-        else:
-            if exists(f"config/{streamer}.txt"):
-                messageidfromfile = readmessageid(streamer)
-                webhookdelete(messageidfromfile)
-                removemessageidfile(streamer)
-    print(f"waiting for {checktime} minutes")
-    discordremotelog("Goinglivebot",14081792,f"waiting for {checktime} minutes")
+                if exists(f"config/{streamer}.txt"):
+                    messageidfromfile = readmessageid(streamer)
+                    webhookdelete(messageidfromfile)
+                    removemessageidfile(streamer)
+        print(f"waiting for {checktime*60} minutes")
+        discordremotelog("Goinglivebot",14081792,f"waiting for {checktime*60} minutes")
+    except Exception as e:
+        print("An exception occurred: ", str(e))
+    print()
     time.sleep(checktime*60)
 
 
