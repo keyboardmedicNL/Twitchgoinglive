@@ -175,6 +175,16 @@ def removemessageidfile(name):
     os.remove(f"config/{name}.txt")
     print(f"removed file {name}.txt")
     discordremotelog("Goinglivebot",14081792,f"removed file {name}.txt")
+
+# gets list of streamers to poll
+def getstreamers():
+    with open("config/streamers.txt", 'r') as streamerfile:
+        streamers = [line.rstrip() for line in streamerfile]
+        if "http" in streamers[0]:
+            response = requests.get(streamers[0])
+            streamers = response.text.splitlines()
+    return(streamers)
+
 # ===== end of functions =====
 
 
@@ -220,8 +230,7 @@ else:
 
 # ===== main code =====
 # cleans up old messages on start
-with open("config/streamers.txt", 'r') as streamerfile:
-    streamers = [line.rstrip() for line in streamerfile]
+streamers = getstreamers()
 for streamer in streamers:
     if exists(f"config/{streamer}.txt"):
         messageidfromfile = readmessageid(streamer)
@@ -233,8 +242,7 @@ discordremotelog("Goinglivebot",14081792,"removed old messages posted to webhook
 # main loop
 while True:
     try:
-        with open("config/streamers.txt", 'r') as streamerfile:
-            streamers = [line.rstrip() for line in streamerfile]
+        streamers = getstreamers()
         for streamer in streamers:
             rresponse,r,islive = getstream(streamer)
             if "401" in str(rresponse):
