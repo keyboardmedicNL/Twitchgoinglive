@@ -3,7 +3,7 @@ a simple script that polls a list of twitch channels and posts a message to a di
 
 ![Alt text](screenshot.png?raw=true "Title")
 
-included are a local webserver for monitoring purposes and a post script that can talk to a remote monitoring server (both can be disabled by leaving their url entry empty)
+included are a local webserver for monitoring purposes and a post script that can talk to a remote monitoring server (both can be disabled by leaving their url entry empty) aswell as a method to post log messages to a discord webhook for remote monitoring.
 
 # how to use
 1. make a config folder and place a config.json in the folder
