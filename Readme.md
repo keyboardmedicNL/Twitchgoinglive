@@ -6,8 +6,9 @@ a simple script that polls a list of twitch channels and posts a message to a di
 included are a local webserver for monitoring purposes and a post script that can talk to a remote monitoring server (both can be disabled by leaving their url entry empty) aswell as a method to post log messages to a discord webhook for remote monitoring.
 
 # how to use
-1. make a config folder and place a config.json in the folder
-2. in the config add the following code:
+1. install python on your system from the python website https://www.python.org/downloads/
+2. make a config folder and place a config.json in the folder
+3. in the config add the following code:
 ```
 {
     "twitchClientId": "Twitch api id",
@@ -23,8 +24,8 @@ included are a local webserver for monitoring purposes and a post script that ca
 }
 
 ```
-3. create a streamers.txt file in the config folder and add every streamer you want to poll on a new line, alternativly add the url to a txt file that contains the list to poll
-4. run the script
+4. create a streamers.txt file in the config folder and add every streamer you want to poll on a new line, alternativly add the url to a txt file that contains the list to poll
+5. run the script
 
 * alternativly you can either build your own docker image with the included dockerfile or use mine with the following command
 ```
