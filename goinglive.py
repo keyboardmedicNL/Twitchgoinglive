@@ -5,6 +5,7 @@ import threading
 from subprocess import call
 from os.path import exists
 import os
+import random
 
 # ===== webhook functions =====
 # webhook send to discord for goinglive message
@@ -20,7 +21,6 @@ def webhooksend(rr):
 
     if response["data"][0]["game_name"] == "":
         response["data"][0]["game_name"] = "none"
-    
     data = {"embeds": [
             {
             "title": f":red_circle: {username} is now live!",
@@ -45,7 +45,7 @@ def webhooksend(rr):
             ],
             "timestamp": started,
             "image": {
-                "url": f"https://static-cdn.jtvnw.net/previews-ttv/live_user_{user}-640x360.jpg?cacheBypass=300"
+                "url": f"https://static-cdn.jtvnw.net/previews-ttv/live_user_{user}-640x360.jpg?cacheBypass={str(random.random())}"
             },
             "thumbnail": {
                 "url": thumbnail
