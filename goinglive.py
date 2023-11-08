@@ -295,12 +295,11 @@ while True:
                     message_id_from_file = read_message_id(streamer)
                     webhook_delete(message_id_from_file)
                     remove_message_id_file(streamer)
-        print(f"waiting for {poll_interval} minutes")
-        discord_remote_log("Goinglivebot","yellow",f"waiting for {poll_interval} minutes")
     except Exception as e:
         print("An exception occurred: ", str(e))
         discord_remote_log("Goinglivebot","red",f"An exception occurred: {str(e)}")
-    print()
+    print(f"waiting for {poll_interval} minutes")
+    discord_remote_log("Goinglivebot","yellow",f"waiting for {poll_interval} minutes")
     time.sleep(poll_interval*60)
 
 

@@ -53,7 +53,10 @@ def webhook_send(rr):
     rl = requests.post(webhook_url, json=data_for_hook, params={'wait': 'true'})
     rl_json = rl.json()
     message_id = rl_json["id"]
-    print(f"discord webhook response for method post is {rl} ({message_id} posted)")
+    if "200" in str(rl):
+        print(f"posting message to discord with id: {message_id} for {streamer}, response is {rl}")
+    else:
+        print(f"attempted to post message to discord with id: {message_id} for {streamer}, response is {rl}")
     return(message_id)
     
 # edits discord webhook message
@@ -102,29 +105,39 @@ def webhook_edit(rr,message_id):
             }
         ]}
     rl = requests.patch(f"{webhook_url}/messages/{message_id}", json=data_for_hook, params={'wait': 'true'})
-    print(f"discord webhook response for method patch is {rl} ({message_id} updated)")
+    if "200" in str(rl):
+        print(f"updating message to discord with id: {message_id} for {streamer}, response is {rl}")
+    else:
+        print(f"attempted to update message to discord with id: {message_id} for {streamer}, response is {rl}")
 
 # deletes discord webhook message
 def webhook_delete(message_id):
     rl = requests.delete(f"{webhook_url}/messages/{message_id}", params={'wait': 'true'})
-    print(f"discord webhook response for method delete is {rl} ({message_id} removed)")
+    if "204" in str(rl):
+        print(f"deleting message om discord with id: {message_id} for {streamer}, response is {rl}")
+    else:
+        print(f"attempted to delete message on discord with id: {message_id} for {streamer}, response is {rl}")
 
 # ===== twitch functions =====
 # renews token used for twitch api calls
 def get_token(): 
         print("Requesting new token from twitch")
-        response=requests.post("https://id.twitch.tv/oauth2/token", json_data={"client_id" : str(twitch_api_id), "client_secret" : str(twitch_api_secret), "grant_type":"client_credentials"})
-        tokenJson = response.json()
-        token = tokenJson["access_token"]
-        print(f"new token is: {token}")
-        with open(r'config/token.txt', 'w') as tokenFile:
-            tokenFile.write("%s\n" % token)
+        response=requests.post("https://id.twitch.tv/oauth2/token", json={"client_id" : str(twitch_api_id), "client_secret" : str(twitch_api_secret), "grant_type":"client_credentials"})
+        if "200" in str(response):
+            token_json = response.json()
+            token = token_json["access_token"]
+            print(f"new token is: {token}")
+            with open(r'config/token.txt', 'w') as tokenFile:
+                tokenFile.write("%s\n" % token)
+        else:
+            print(f"unable to request new token with response: {response}")
+            token = "empty"
         return(token)
 
 # gets stream information from twitch api
 def get_stream(streamer): 
     response=requests.get(f"https://api.twitch.tv/helix/streams?&user_login={streamer}", headers={'Authorization':f"Bearer {token}", 'Client-Id':twitch_api_id})
-    print(f"response for get_stream with name {streamer} is {response}")
+    print(f"tried to get streamer information with function get_stream for {streamer} with response: {response}")
     responsejson = response.json()
     try:
         is_live = responsejson["data"][0]["type"]
@@ -197,10 +210,9 @@ print("removed old messages posted to webhook")
 # main loop
 while True:
     try:
-        streamers = get_streamers()
         for streamer in streamers:
             rresponse,r,is_live = get_stream(streamer)
-            if "401" in str(rresponse):
+            if not "200" in str(rresponse):
                 token = get_token()
                 rresponse,r,is_live = get_stream(streamer)
             if is_live == "live":
@@ -215,10 +227,9 @@ while True:
                     message_id_from_file = read_message_id(streamer)
                     webhook_delete(message_id_from_file)
                     remove_message_id_file(streamer)
-        print(f"waiting for {poll_interval} minutes")
     except Exception as e:
         print("An exception occurred: ", str(e))
-    print()
+    print(f"waiting for {poll_interval} minutes")
     time.sleep(poll_interval*60)
 
 
