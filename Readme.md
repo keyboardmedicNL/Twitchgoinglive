@@ -8,7 +8,7 @@ a simple script that polls a list of twitch channels and posts a message to a di
 
 **the script currently comes with 2 versions:**   
 - the lite version, wich just contains the script to check for livestreams and posts them to discord aswell.    
-- the full version, wich contains the script, the option to send log messages to a discord webhook for easy remote monitoring and a simple webserver that can be pinged to monitor uptime, aswell as simple service that will send a http post to an adress of your chosing with a configurable timer with the json ```{'name': "bot_name", 'time': "unix timestamp of current time in utc"}``` all of this can be toggled on or off in the config
+- the full version, wich contains the script, the option to send log messages to a discord webhook for easy remote monitoring and a simple webserver that can be pinged to monitor uptime, aswell as simple remote post service that will send a http post to an adress of your chosing with a configurable timer with the json ```{'name': "bot_name", 'time': "unix timestamp of current time in utc"}``` all of this can be toggled on or off in the config
 
 
 # how to use
@@ -35,7 +35,7 @@ full:
     "discord_webhook_url": "webhook to post main messages to",
     "poll_interval": "time in minutes between polls",
     "use_web_server": "true or false",
-    "webs_erver_url": "adress for local webserver OPTIONAL",
+    "web_server_url": "adress for local webserver OPTIONAL",
     "web_server_port": "port for local webserver OPTIONAL",
     "use_discord_logs": "true or false",
     "discord_remote_log_url": "webhook to post log messages to OPTIONAL",
@@ -59,6 +59,25 @@ on linux: in a terminal with ```python goinglive.py``` or ```python goinglivelit
 ```
 docker run -it -d --name twitchgoinglive -v /path/to/config:/usr/src/app/config keyboardmedic/twitchgoinglive:latest
 ```
+# how it works
+**main script**
+- loads the config.   
+- launches the webserver and post server in seperate threads if selected in the config.
+- checks if token.txt is present in the config folder and reads it to load the auth token for twitch api calls, if not it runs the get_token function to request an auth token from twitch and saves it to token.txt
+- it gets the list of streamers to poll with the get_streamers function and checks if any txt files exsist in the config folder with streamer names with a saved messageid, if it finds any it will attempt to delete the messages on discord with the corresponding message id, it does this to avoid leaving old messages up between restarts
+- it then loops trough all the streamers and gets the stream information from the twitch api to see if they are live and to retrieve the needed data for the message
+- if a streamer is live it checks if a txt file with the streamers name exsists, if it does not exsist it posts a message to discord and creates a txt file with the name of the streamer wich holds the messageid of the message posted to discord, if the txt does exsist it reads it for the messageid and then updates the message on discord with that id
+- if a streamer is not live it checks if a txt file exsists with the streamers name and if it does it will read it for the message id and delete that message on discord.
+- it then waits for the preconfigured time and loops back to looping trough the streamers.
+
+**webserver**
+- loads the config
+- serves a website on the defined adress with the defined port with just a plain text message that says "hello i am a webserver"
+
+**remote post**
+- loads the config
+- sends a http post to the configured adress with the following json ```{'name': "bot_name as configured", 'time': "unix timestamp of current time in utc"}```
+- waits for the configured timeout and then sends a post again
 
 # disclaimer
 these scripts are written by an amateur... use at your own risk
