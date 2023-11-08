@@ -34,7 +34,7 @@ while True:
     currentTime = currentTime.timestamp()
     myobj = {'name': bot_name, 'time': currentTime} # formats currenttime in unix timestamp and bot_name into correct json formatting
     try:
-        x = requests.post( f"https://{remote_http_server_url}", json = myobj) # sends post request
+        x = requests.post( remote_http_server_url, json = myobj) # sends post request
         print("<POST> webhook response is: " + x.text) # log message
         discord_remote_log("Goinglivebot/post",14081792,f"webhook response is: {x.text}")
     except Exception as e: # catches exception
