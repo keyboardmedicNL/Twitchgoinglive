@@ -35,7 +35,7 @@ full:
     "discord_webhook_url": "webhook to post main messages to",
     "poll_interval": "time in minutes between polls",
     "use_web_server": "true or false",
-    "webs_erver_url": "adress for local webserver OPTIONAL",
+    "web_server_url": "adress for local webserver OPTIONAL",
     "web_server_port": "port for local webserver OPTIONAL",
     "use_discord_logs": "true or false",
     "discord_remote_log_url": "webhook to post log messages to OPTIONAL",
