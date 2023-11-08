@@ -15,7 +15,7 @@ a simple script that polls a list of twitch channels and posts a message to a di
 1. install python on your system from the python website https://www.python.org/downloads/ (if you want to use the included batch to launch be sure to select ```add python to path``` during the installation)
 2. in the config folder, copy the ```example_config.json``` and rename it to ```config.json```
 3. you will need a twitch api id and secret. If you do not have one you can register an application at https://dev.twitch.tv/ to obtain your id and secret
-3. in the config addjust the following lines as needed for your version:   
+3. in the config adjust the following lines as needed for your version:   
 
 lite:
 ```
