@@ -1,0 +1,6 @@
+{
+    "twitch_api_id": "Twitch api id",
+    "twitch_api_secret": "Twitch api token",
+    "discord_webhook_url": "webhook to post main messages to",
+    "poll_interval": "time in minutes between polls"
+}

@@ -5,27 +5,27 @@ import json
 import requests
 
 # formats embed for discord webhook and posts to url
-def discordremotelog(title,color,description):
-    if webhooklogurl != "":
-        data = {"embeds": [
+def discord_remote_log(title,color,description):
+    if use_discord_logs.lower() == "true":
+        data_for_log_hook = {"embeds": [
                 {
                     "title": title,
                     "color": color,
                     "description": description
                 }
             ]}
-        rl = requests.post(webhooklogurl, json=data)
+        rl = requests.post(discord_remote_log_url, json=data_for_log_hook)
 
 # loads config into variables for use in script
 with open("config/config.json") as config: # opens config and stores data in variables
-    configJson = json.load(config)
-    hostName = configJson["hostname"]
-    serverPort = int(configJson["webport"])
-    webhooklogurl = configJson["webhooklogurl"]
-    config.close()
-    configcheck = True # stops loop if succesfull
+    config_json = json.load(config)
+    web_server_url = str(config_json["web_server_url"])
+    web_server_port = int(config_json["web_server_port"])
+    use_discord_logs = str(config_json["use_discord_logs"])
+    if use_discord_logs.lower() == "true":
+        discord_remote_log_url = str(config_json["discord_remote_log_url"])
     print("<WEBSERVER> Succesfully loaded config")
-    discordremotelog("Goinglivebot/webserver",14081792,"succesfully loaded config")
+    discord_remote_log("Goinglivebot/webserver",14081792,"succesfully loaded config")
 
 # start webserver
 class MyServer(BaseHTTPRequestHandler):
@@ -40,9 +40,7 @@ class MyServer(BaseHTTPRequestHandler):
         self.wfile.write(bytes("</body></html>", "utf-8"))
 
 if __name__ == "__main__":        
-    webServer = HTTPServer((hostName, serverPort), MyServer)
-    print("<WEBSERVER> Server started http://%s:%s" % (hostName, serverPort))
-    discordremotelog("Goinglivebot/webserver",703235,"Server started http://%s:%s" % (hostName, serverPort))
-
-
+    webServer = HTTPServer((web_server_url, web_server_port), MyServer)
+    print("<WEBSERVER> Server started http://%s:%s" % (web_server_url, web_server_port))
+    discord_remote_log("Goinglivebot/webserver",703235,"Server started http://%s:%s" % (web_server_url, web_server_port))
     webServer.serve_forever()
