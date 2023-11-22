@@ -210,6 +210,7 @@ print("removed old messages posted to webhook")
 # main loop
 while True:
     try:
+        streamers = get_streamers()
         for streamer in streamers:
             rresponse,r,is_live = get_stream(streamer)
             if not "200" in str(rresponse):
