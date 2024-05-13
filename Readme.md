@@ -1,3 +1,6 @@
+# Download the script from releases do NOT just clone the repo
+please...
+
 # important
 the config format has changed between version 0.1.1 and 0.2, ensure you use the new config format or the script will not work!
 
