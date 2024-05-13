@@ -57,10 +57,10 @@ def webhook_send(rr):
     message_id = rl_json["id"]
     if "200" in str(rl):
         print(f"posting message to discord with id: {message_id} for {streamer}, response is {rl}")
-        discord_remote_log("Goinglivebot","green",f"posting message to discord with discord id: {message_id} for {streamer}, response is {rl}")
+        discord_remote_log("Goinglivebot","green",f"posting message to discord with discord id: {message_id} for {streamer}, response is {rl}",False)
     else:
         print(f"attempted to post message to discord with id: {message_id} for {streamer}, response is {rl}")
-        discord_remote_log("Goinglivebot","red",f"attempted to post message to discord with discord id: {message_id} for {streamer}, response is {rl}")
+        discord_remote_log("Goinglivebot","red",f"attempted to post message to discord with discord id: {message_id} for {streamer}, response is {rl}",True)
     return(message_id)
     
 # edits discord webhook message
@@ -111,37 +111,37 @@ def webhook_edit(rr,message_id):
     rl = requests.patch(f"{webhook_url}/messages/{message_id}", json=data_for_hook, params={'wait': 'true'})
     if "200" in str(rl):
         print(f"updating message to discord with id: {message_id} for {streamer}, response is {rl}")
-        discord_remote_log("Goinglivebot","green",f"updating message to discord with discord id: {message_id} for {streamer}, response is {rl}")
+        discord_remote_log("Goinglivebot","green",f"updating message to discord with discord id: {message_id} for {streamer}, response is {rl}",False)
     else:
         print(f"attempted to update message to discord with id: {message_id} for {streamer}, response is {rl}")
-        discord_remote_log("Goinglivebot","red",f"attempted to update message to discord with discord id: {message_id} for {streamer}, response is {rl}")
+        discord_remote_log("Goinglivebot","red",f"attempted to update message to discord with discord id: {message_id} for {streamer}, response is {rl}",True)
 
 # deletes discord webhook message
 def webhook_delete(message_id):
     rl = requests.delete(f"{webhook_url}/messages/{message_id}", params={'wait': 'true'})
     if "204" in str(rl):
         print(f"deleting message om discord with id: {message_id} for {streamer}, response is {rl}")
-        discord_remote_log("Goinglivebot","green",f"deleting message om discord with id: {message_id} for {streamer}, response is {rl}")
+        discord_remote_log("Goinglivebot","green",f"deleting message om discord with id: {message_id} for {streamer}, response is {rl}",False)
     else:
         print(f"attempted to delete message on discord with id: {message_id} for {streamer}, response is {rl}")
-        discord_remote_log("Goinglivebot","red",f"attempted to delete message on discord with id: {message_id} for {streamer}, response is {rl}")
+        discord_remote_log("Goinglivebot","red",f"attempted to delete message on discord with id: {message_id} for {streamer}, response is {rl}",True)
 
 # ===== twitch functions =====
 # renews token used for twitch api calls
 def get_token(): 
         print("Requesting new token from twitch")
-        discord_remote_log("Goinglivebot","yellow",f"Requesting new token from twitch")
+        discord_remote_log("Goinglivebot","yellow",f"Requesting new token from twitch",False)
         response=requests.post("https://id.twitch.tv/oauth2/token", json={"client_id" : str(twitch_api_id), "client_secret" : str(twitch_api_secret), "grant_type":"client_credentials"})
         if "200" in str(response):
             token_json = response.json()
             token = token_json["access_token"]
             print(f"new token is: {token}")
-            discord_remote_log("Goinglivebot","green",f"new auth token recieved")
+            discord_remote_log("Goinglivebot","green",f"new auth token recieved",False)
             with open(r'config/token.txt', 'w') as tokenFile:
                 tokenFile.write("%s\n" % token)
         else:
             print(f"unable to request new token with response: {response}")
-            discord_remote_log("Goinglivebot","red",f"unable to request new token with response: {response}")
+            discord_remote_log("Goinglivebot","red",f"unable to request new token with response: {response}",True)
             token = "empty"
         return(token)
 
@@ -150,20 +150,20 @@ def get_stream(streamer):
     response=requests.get(f"https://api.twitch.tv/helix/streams?&user_login={streamer}", headers={'Authorization':f"Bearer {token}", 'Client-Id':twitch_api_id})
     print(f"tried to get streamer information with function get_stream for {streamer} with response: {response}")
     if "200" in str(response):
-        discord_remote_log("Goinglivebot","green",f"got streamer information with function get_stream for {streamer} with response: {response}")
+        discord_remote_log("Goinglivebot","green",f"got streamer information with function get_stream for {streamer} with response: {response}",False)
     else:
-        discord_remote_log("Goinglivebot","red",f"tried to get streamer information with function get_stream for {streamer} with response: {response}")
+        discord_remote_log("Goinglivebot","red",f"tried to get streamer information with function get_stream for {streamer} with response: {response}",True)
     responsejson = response.json()
     try:
         is_live = responsejson["data"][0]["type"]
-        discord_remote_log("Goinglivebot","green",f"{streamer} is live!")
+        discord_remote_log("Goinglivebot","green",f"{streamer} is live!",False)
     except:
         is_live = ""
     return(response, responsejson, is_live)
 
 # ===== other functions =====
 # simple discord webhook send for remote logging
-def discord_remote_log(title,color,description): 
+def discord_remote_log(title,color,description,ping): 
     if use_discord_logs.lower() == "true":
         if color == "blue":
             color = 1523940
@@ -175,7 +175,11 @@ def discord_remote_log(title,color,description):
             color = 703235
         elif color == "purple":
             color = 10622948
-        data_for_log_hook = {"embeds": [
+        if ping:
+            ping_string = f"<@{ping_id}>"
+        else:
+            ping_string = ""
+        data_for_log_hook = {"content": ping_string, "embeds": [
                 {
                     "title": title,
                     "color": color,
@@ -191,7 +195,7 @@ def save_message_id(name,message_id):
     with open(fileName, 'w') as File:
         File.write(message_id)
     print(f"{message_id} saved in file {name}.txt")
-    discord_remote_log("Goinglivebot","green",f"message id: {message_id} saved in file {name}.txt")
+    discord_remote_log("Goinglivebot","green",f"message id: {message_id} saved in file {name}.txt",False)
 
 # reads streamid from file
 def read_message_id(name):
@@ -199,14 +203,14 @@ def read_message_id(name):
     with open(fileName, 'r') as File:
         message_id = str(File.readline())
     print(f"{message_id} read from {name}.txt")
-    discord_remote_log("Goinglivebot","green",f"message id: {message_id} read from {name}.txt")
+    discord_remote_log("Goinglivebot","green",f"message id: {message_id} read from {name}.txt",False)
     return(message_id)
 
 # remove file
 def remove_message_id_file(name):
     os.remove(f"config/{name}.txt")
     print(f"removed file {name}.txt")
-    discord_remote_log("Goinglivebot","green",f"removed file {name}.txt")
+    discord_remote_log("Goinglivebot","green",f"removed file {name}.txt",False)
 
 # gets list of streamers to poll
 def get_streamers():
@@ -215,7 +219,7 @@ def get_streamers():
         if "http" in streamers[0]:
             response = requests.get(streamers[0])
             streamers = response.text.splitlines()
-    discord_remote_log("Goinglivebot","yellow",f"list of streamers to poll from: {streamers}")
+    discord_remote_log("Goinglivebot","yellow",f"list of streamers to poll from: {streamers}",False)
     return(streamers)
 
 # ===== end of functions =====
@@ -230,10 +234,11 @@ with open("config/config.json") as config:
     poll_interval = int(config_json["poll_interval"])
     use_web_server = str(config_json["use_web_server"])
     use_remote_post = str(config_json["use_remote_post"])
+    ping_id = str(config_json["pingid"])
     use_discord_logs = str(config_json["use_discord_logs"])
     if use_discord_logs.lower() == "true":
         discord_remote_log_url = str(config_json["discord_remote_log_url"])
-discord_remote_log("Goinglivebot","blue","succesfully loaded config")
+discord_remote_log("Goinglivebot","blue","succesfully loaded config",False)
 print("succesfully loaded config")
 
 # webserver for local monitoring
@@ -243,7 +248,7 @@ if use_web_server.lower() == "true":
     process_thread = threading.Thread(target=thread_second)
     process_thread.start()
     print("starting webserver for local monitoring") 
-    discord_remote_log("Goinglivebot","blue","starting webserver for local monitoring")
+    discord_remote_log("Goinglivebot","blue","starting webserver for local monitoring",False)
 
 #post process to talk to remote monitor
 if use_remote_post.lower() == "true":
@@ -252,7 +257,7 @@ if use_remote_post.lower() == "true":
     process_thread = threading.Thread(target=thread_third)
     process_thread.start()
     print("starting post server for remote monitoring")
-    discord_remote_log("Goinglivebot","blue","starting post server for remote monitoring")
+    discord_remote_log("Goinglivebot","blue","starting post server for remote monitoring",False)
 
 #opens file to get auth token
 if exists(f"config/token.txt"):
@@ -260,7 +265,7 @@ if exists(f"config/token.txt"):
         tokenRaw = str(file2.readline())
         token = tokenRaw.strip()
     print ("Token to use for auth: " + token)
-    discord_remote_log("Goinglivebot","blue","auth token loaded succesfully")
+    discord_remote_log("Goinglivebot","blue","auth token loaded succesfully",False)
 else:
     token = get_token()
 
@@ -273,7 +278,7 @@ for streamer in streamers:
         webhook_delete(message_id_from_file)
         remove_message_id_file(streamer)
 print("removed old messages posted to webhook")
-discord_remote_log("Goinglivebot","blue","removed old messages posted to webhook")
+discord_remote_log("Goinglivebot","blue","removed old messages posted to webhook",False)
 
 # main loop
 while True:
@@ -298,9 +303,9 @@ while True:
                     remove_message_id_file(streamer)
     except Exception as e:
         print("An exception occurred: ", str(e))
-        discord_remote_log("Goinglivebot","red",f"An exception occurred: {str(e)}")
+        discord_remote_log("Goinglivebot","red",f"An exception occurred: {str(e)}",True)
     print(f"waiting for {poll_interval} minutes")
-    discord_remote_log("Goinglivebot","yellow",f"waiting for {poll_interval} minutes")
+    discord_remote_log("Goinglivebot","yellow",f"waiting for {poll_interval} minutes",False)
     time.sleep(poll_interval*60)
 
 

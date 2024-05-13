@@ -42,7 +42,8 @@ full:
     "use_remote_post": "true or false",
     "remote_http_server_url": "url of remote monitoring server OPTIONAL",
     "bot_name": "bot name to send to remote monitoring server OPTIONAL",
-    "post_interval": "timeout in minutes to send message to monitoring server OPTIONAL"
+    "post_interval": "timeout in minutes to send message to monitoring server OPTIONAL",
+    "pingid": "user or group id to ping incase of an error for remote logging OPTIONAL"
 }
 ```
 5. create a streamers.txt file in the config folder and add the username of every streamer you want to poll on a new line, alternativly add a url to a txt file that contains the list to poll
