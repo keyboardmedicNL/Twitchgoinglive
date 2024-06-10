@@ -13,5 +13,7 @@
     "bot_name": "bot name to send to remote monitoring server OPTIONAL",
     "post_interval": "timeout in minutes to send message to monitoring server OPTIONAL",
     "pingid": "role or userid (not username but numerical id) for discord pings",
-    "vebose": "true or false"
+    "vebose": "0, 1 or 2 (0 is basic logging, 1 is extensive logging, 2 is extensive logging with remote logging responses)",
+    "use_gotify": "true or false",
+    "gotifyurl": "url for your gotify server"
 }

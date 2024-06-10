@@ -11,7 +11,7 @@ a simple script that polls a list of twitch channels and posts a message to a di
 
 **the script currently comes with 2 versions:**   
 - the lite version, wich just contains the script to check for livestreams and posts them to discord aswell.    
-- the full version, wich contains the script, the option to send log messages to a discord webhook for easy remote monitoring and a simple webserver that can be pinged to monitor uptime, aswell as simple remote post service that will send a http post to an adress of your chosing with a configurable timer with the json ```{'name': "bot_name", 'time': "unix timestamp of current time in utc"}``` all of this can be toggled on or off in the config
+- the full version, wich contains the script, the option to send log messages to a discord webhook for easy remote monitoring and a simple webserver that can be pinged to monitor uptime, aswell as simple remote post service that will send a http post to an adress of your chosing with a configurable timer with the json ```{'name': "bot_name", 'time': "unix timestamp of current time in utc"}``` and the option to send error messages to a gotify server, all of this can be toggled on or off in the config
 
 
 # how to use
@@ -47,7 +47,9 @@ full:
     "bot_name": "bot name to send to remote monitoring server OPTIONAL",
     "post_interval": "timeout in minutes to send message to monitoring server OPTIONAL",
     "pingid": "user or group id to ping incase of an error for remote logging OPTIONAL"
-    "verbose": "true or false, wether or not the script outputs all logging messages or just the basics"
+    "verbose": "true or false, wether or not the script outputs all logging messages or just the basics",
+    "use_gotify": "true or false",
+    "gotifyurl": "url for your gotify server"
 }
 ```
 5. create a streamers.txt file in the config folder and add the username of every streamer you want to poll on a new line, alternativly add a url to a txt file that contains the list to poll
@@ -83,6 +85,9 @@ docker run -it -d --name twitchgoinglive -v /path/to/config:/usr/src/app/config 
 - loads the config
 - sends a http post to the configured adress with the following json ```{'name': "bot_name as configured", 'time': "unix timestamp of current time in utc"}```
 - waits for the configured timeout and then sends a post again
+
+**gotify**
+- if an error occurs a message gets pushed to your gotify server
 
 # disclaimer
 these scripts are written by an amateur... use at your own risk

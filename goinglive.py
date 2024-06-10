@@ -56,12 +56,14 @@ def webhook_send(rr):
     rl_json = rl.json()
     message_id = rl_json["id"]
     if "200" in str(rl):
-        if verbose:
+        if verbose >= 1:
             print(f"posting message to discord with id: {message_id} for {streamer}, response is {rl}")
             discord_remote_log("Goinglivebot","green",f"posting message to discord with discord id: {message_id} for {streamer}, response is {rl}",False)
     else:
         print(f"attempted to post message to discord with id: {message_id} for {streamer}, response is {rl}")
         discord_remote_log("Goinglivebot","red",f"attempted to post message to discord with discord id: {message_id} for {streamer}, response is {rl}",True)
+        gotify("Clipbot",f"attempted to post message to discord with discord id: {message_id} for {streamer}, response is {rl}","5")
+        
     return(message_id)
     
 # edits discord webhook message
@@ -111,35 +113,37 @@ def webhook_edit(rr,message_id):
         ]}
     rl = requests.patch(f"{webhook_url}/messages/{message_id}", json=data_for_hook, params={'wait': 'true'})
     if "200" in str(rl):
-        if verbose:
+        if verbose >= 1:
             print(f"updating message to discord with id: {message_id} for {streamer}, response is {rl}")
             discord_remote_log("Goinglivebot","green",f"updating message to discord with discord id: {message_id} for {streamer}, response is {rl}",False)
     else:
         print(f"attempted to update message to discord with id: {message_id} for {streamer}, response is {rl}")
         discord_remote_log("Goinglivebot","red",f"attempted to update message to discord with discord id: {message_id} for {streamer}, response is {rl}",True)
+        gotify("Clipbot",f"attempted to update message to discord with discord id: {message_id} for {streamer}, response is {rl}","5")
 
 # deletes discord webhook message
 def webhook_delete(message_id):
     rl = requests.delete(f"{webhook_url}/messages/{message_id}", params={'wait': 'true'})
     if "204" in str(rl):
-        if verbose:
+        if verbose >= 1:
             print(f"deleting message om discord with id: {message_id} for {streamer}, response is {rl}")
             discord_remote_log("Goinglivebot","green",f"deleting message om discord with id: {message_id} for {streamer}, response is {rl}",False)
     else:
         print(f"attempted to delete message on discord with id: {message_id} for {streamer}, response is {rl}")
         discord_remote_log("Goinglivebot","red",f"attempted to delete message on discord with id: {message_id} for {streamer}, response is {rl}",True)
+        gotify("Clipbot",f"attempted to delete message on discord with id: {message_id} for {streamer}, response is {rl}","5")
 
 # ===== twitch functions =====
 # renews token used for twitch api calls
 def get_token():
-        if verbose: 
+        if verbose >= 1: 
             print("Requesting new api auth token from twitch")
             discord_remote_log("Goinglivebot","yellow","Requesting new api auth token from twitch",False)
         response=requests.post("https://id.twitch.tv/oauth2/token", json={"client_id" : str(twitch_api_id), "client_secret" : str(twitch_api_secret), "grant_type":"client_credentials"})
         if "200" in str(response):
             token_json = response.json()
             token = token_json["access_token"]
-            if verbose:
+            if verbose >= 1:
                 print(f"new twitch api auth token is: {token}")
                 discord_remote_log("Goinglivebot","green",f"new twitch api auth token recieved",False)
             with open(r'config/token.txt', 'w') as tokenFile:
@@ -147,6 +151,7 @@ def get_token():
         else:
             print(f"unable to request new twitch api auth token with response: {response}")
             discord_remote_log("Goinglivebot","red",f"unable to request new twitch api auth token with response: {response}",True)
+            gotify("Clipbot",f"unable to request new twitch api auth token with response: {response}","5")
             token = "empty"
         return(token)
 
@@ -155,10 +160,11 @@ def get_stream(streamer):
     response=requests.get(f"https://api.twitch.tv/helix/streams?&user_login={streamer}", headers={'Authorization':f"Bearer {token}", 'Client-Id':twitch_api_id})
     print(f"tried to get streamer information with function get_stream for {streamer} with response: {response}")
     if "200" in str(response):
-        if verbose:
+        if verbose >= 1:
             discord_remote_log("Goinglivebot","green",f"got streamer information with function get_stream for {streamer} with response: {response}",False) 
     else:
             discord_remote_log("Goinglivebot","red",f"tried to get streamer information with function get_stream for {streamer} with response: {response}",True)
+            gotify("Clipbot",f"tried to get streamer information with function get_stream for {streamer} with response: {response}","5")
     responsejson = response.json()
     try:
         is_live = responsejson["data"][0]["type"]
@@ -195,7 +201,17 @@ def discord_remote_log(title,color,description,ping):
                     "description": description
                 }
             ]}
-        rl = requests.post(discord_remote_log_url, json=data_for_log_hook)
+        rl = requests.post(discord_remote_log_url, json=data_for_log_hook, params={'wait': 'true'})
+        if verbose >= 2:
+            print(f"sending message to discord remote log webhook with title: {title} Color: {color} Description: {description} and ping: {ping_string} . Discord response is {str(rl)}")
+        time.sleep(1)
+
+# gotify notification
+def gotify(title,message,priority):
+    if use_gotify.lower() == "true":
+        gr = requests.post(gotifyurl, data={"title": title, "message": message, "priority":priority})
+        if verbose >= 2:
+            print(f"sending notification to gotify with title: {title} message: {message} priority: {priority}")
         time.sleep(1)
 
 # saves streamid to file
@@ -203,7 +219,7 @@ def save_message_id(name,message_id):
     fileName = f"config/{name}.txt"
     with open(fileName, 'w') as File:
         File.write(message_id)
-    if verbose:
+    if verbose >= 1:
         print(f"message id: {message_id} saved in file {name}.txt")
         discord_remote_log("Goinglivebot","blue",f"message id: {message_id} saved in file {name}.txt",False)
 
@@ -212,7 +228,7 @@ def read_message_id(name):
     fileName = f"config/{name}.txt"
     with open(fileName, 'r') as File:
         message_id = str(File.readline())
-    if verbose:
+    if verbose >= 1:
         print(f"message id : {message_id} read from {name}.txt")
         discord_remote_log("Goinglivebot","blue",f"message id: {message_id} read from {name}.txt",False)
     return(message_id)
@@ -220,7 +236,7 @@ def read_message_id(name):
 # remove file
 def remove_message_id_file(name):
     os.remove(f"config/{name}.txt")
-    if verbose:
+    if verbose >= 1:
         print(f"removed file containing message id for embed for {name}.txt")
         discord_remote_log("Goinglivebot","blue",f"removed file containing message id for embed for {name}.txt",False)
 
@@ -247,12 +263,10 @@ with open("config/config.json") as config:
     poll_interval = int(config_json["poll_interval"])
     use_web_server = str(config_json["use_web_server"])
     use_remote_post = str(config_json["use_remote_post"])
+    use_gotify = str(config_json["use_gotify"])
     ping_id = str(config_json["pingid"])
-    verbose = str(config_json["verbose"])
-    if verbose.lower() == "false":
-        verbose = False
-    else:
-        verbose = True
+    verbose = int(config_json["verbose"])
+    gotifyurl = str(config_json["gotifyurl"])
     use_discord_logs = str(config_json["use_discord_logs"])
     if use_discord_logs.lower() == "true":
         discord_remote_log_url = str(config_json["discord_remote_log_url"])
@@ -328,8 +342,9 @@ while True:
                     webhook_delete(message_id_from_file)
                     remove_message_id_file(streamer)
     except Exception as e:
-        print("An exception occurred: ", str(e))
-        discord_remote_log("Goinglivebot","red",f"An exception occurred: {str(e)}",True)
+        print(f"An exception occurred for streamer {streamer} : {str(e)}")
+        discord_remote_log("Goinglivebot","red",f"An exception occurred for streamer {streamer} : {str(e)}",True)
+        gotify("Clipbot",f"An exception occurred for streamer {streamer} : {str(e)}","5")
     print(f"finished main loop, waiting for {poll_interval} minutes")
     discord_remote_log("Goinglivebot","gray",f"finished main loop, waiting for {poll_interval} minutes",False)
     time.sleep(poll_interval*60)
