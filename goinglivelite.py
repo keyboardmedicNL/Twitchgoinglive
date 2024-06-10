@@ -121,16 +121,16 @@ def webhook_delete(message_id):
 # ===== twitch functions =====
 # renews token used for twitch api calls
 def get_token(): 
-        print("Requesting new token from twitch")
+        print("Requesting new twitch api auth token from twitch")
         response=requests.post("https://id.twitch.tv/oauth2/token", json={"client_id" : str(twitch_api_id), "client_secret" : str(twitch_api_secret), "grant_type":"client_credentials"})
         if "200" in str(response):
             token_json = response.json()
             token = token_json["access_token"]
-            print(f"new token is: {token}")
+            print(f"new twitch api auth token is: {token}")
             with open(r'config/token.txt', 'w') as tokenFile:
                 tokenFile.write("%s\n" % token)
         else:
-            print(f"unable to request new token with response: {response}")
+            print(f"unable to request new twitch api auth token with response: {response}")
             token = "empty"
         return(token)
 
@@ -152,20 +152,20 @@ def save_message_id(name,message_id):
     fileName = f"config/{name}.txt"
     with open(fileName, 'w') as File:
         File.write(message_id)
-    print(f"{message_id} saved in file {name}.txt")
+    print(f"message id: {message_id} saved in file {name}.txt")
 
 # reads streamid from file
 def read_message_id(name):
     fileName = f"config/{name}.txt"
     with open(fileName, 'r') as File:
         message_id = str(File.readline())
-    print(f"{message_id} read from {name}.txt")
+    print(f"message id: {message_id} read from {name}.txt")
     return(message_id)
 
 # remove file
 def remove_message_id_file(name):
     os.remove(f"config/{name}.txt")
-    print(f"removed file {name}.txt")
+    print(f"removed file containing the message id for the embed for {name}.txt")
 
 # gets list of streamers to poll
 def get_streamers():
@@ -174,6 +174,7 @@ def get_streamers():
         if "http" in streamers[0]:
             response = requests.get(streamers[0])
             streamers = response.text.splitlines()
+    print(f"list of streamers to poll from: {streamers}")
     return(streamers)
 
 # ===== end of functions =====
@@ -193,12 +194,13 @@ if exists(f"config/token.txt"):
     with open("config/token.txt", 'r') as file2:
         tokenRaw = str(file2.readline())
         token = tokenRaw.strip()
-    print ("Token to use for auth: " + token)
+    print ("twitch api auth token to use for auth: " + token)
 else:
     token = get_token()
 
 # ===== main code =====
 # cleans up old messages on start
+print("pulling list of streamers once to remove old message")
 streamers = get_streamers()
 for streamer in streamers:
     if exists(f"config/{streamer}.txt"):
@@ -218,19 +220,22 @@ while True:
                 rresponse,r,is_live = get_stream(streamer)
             if is_live == "live":
                 if exists(f"config/{streamer}.txt"):
+                    print(f"embed allready exsists for {streamer}, updating it")
                     message_id_from_file = read_message_id(streamer)
                     webhook_edit(r,message_id_from_file)
                 else:
+                    print(f"no embed exsists for {streamer}, creating it")
                     message_id = webhook_send(r)
                     save_message_id(streamer,message_id)
             else:
                 if exists(f"config/{streamer}.txt"):
+                    print(f"{streamer} is no longer live, deleting embed")
                     message_id_from_file = read_message_id(streamer)
                     webhook_delete(message_id_from_file)
                     remove_message_id_file(streamer)
     except Exception as e:
-        print("An exception occurred: ", str(e))
-    print(f"waiting for {poll_interval} minutes")
+        print("An exception occurred in the main loop: ", str(e))
+    print(f"main loop finished, waiting for {poll_interval} minutes")
     time.sleep(poll_interval*60)
 
 

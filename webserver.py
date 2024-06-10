@@ -36,7 +36,7 @@ with open("config/config.json") as config: # opens config and stores data in var
     if use_discord_logs.lower() == "true":
         discord_remote_log_url = str(config_json["discord_remote_log_url"])
     print("<WEBSERVER> Succesfully loaded config")
-    discord_remote_log("Goinglivebot/webserver","blue","succesfully loaded config")
+    discord_remote_log("Goinglivebot/webserver","purple","succesfully loaded config")
 
 # start webserver
 try:
@@ -54,7 +54,7 @@ try:
     if __name__ == "__main__":        
         webServer = HTTPServer((web_server_url, web_server_port), MyServer)
         print("<WEBSERVER> Server started http://%s:%s" % (web_server_url, web_server_port))
-        discord_remote_log("Goinglivebot/webserver","green","Server started http://%s:%s" % (web_server_url, web_server_port))
+        discord_remote_log("Goinglivebot/webserver","purple","Server started http://%s:%s" % (web_server_url, web_server_port))
         webServer.serve_forever()
 except Exception as e:
         print(f"An exception occurred in main loop: {str(e)}")

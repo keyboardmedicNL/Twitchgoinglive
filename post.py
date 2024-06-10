@@ -37,7 +37,7 @@ with open("config/config.json") as config: # opens config and stores data in var
     if use_discord_logs.lower() == "true":
         discord_remote_log_url = str(config_json["discord_remote_log_url"])
     print("<POST> Succesfully loaded config")
-    discord_remote_log("Goinglivebot/post","blue","succesfully loaded config")
+    discord_remote_log("Goinglivebot/post","purple","succesfully loaded config")
 
 # main loop
 while True:
@@ -47,7 +47,7 @@ while True:
     try:
         x = requests.post( remote_http_server_url, json = myobj) # sends post request
         print("<POST> webhook response is: " + x.text) # log message
-        discord_remote_log("Goinglivebot/post","purple",f"webhook response is: {x.text}")
+        discord_remote_log("Goinglivebot/post","purple",f"send out a post request, webhook response is: {x.text}")
     except Exception as e: # catches exception
         print(f"An exception occurred in main loop: {str(e)}")
         discord_remote_log("Goinglivebot/post","red",f"An exception occurred in main loop: {str(e)}")

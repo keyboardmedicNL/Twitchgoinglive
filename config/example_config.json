@@ -12,5 +12,6 @@
     "remote_http_server_url": "url of remote monitoring server OPTIONAL",
     "bot_name": "bot name to send to remote monitoring server OPTIONAL",
     "post_interval": "timeout in minutes to send message to monitoring server OPTIONAL",
-    "pingid": ""
+    "pingid": "role or userid (not username but numerical id) for discord pings",
+    "vebose": "true or false"
 }
