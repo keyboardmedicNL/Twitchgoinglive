@@ -242,14 +242,17 @@ def remove_message_id_file(name):
 
 # gets list of streamers to poll
 def get_streamers():
+    streamer_check = True
     with open("config/streamers.txt", 'r') as streamerfile:
         streamers = [line.rstrip() for line in streamerfile]
         if "http" in streamers[0]:
             response = requests.get(streamers[0])
             streamers = response.text.splitlines()
+        if "200" not in str(response):
+            streamer_check = False
     print(f"list of streamers to poll from: {streamers}")
     discord_remote_log("Goinglivebot","yellow",f"list of streamers to poll from: {streamers}",False)
-    return(streamers)
+    return(streamers, streamer_check)
 
 # ===== end of functions =====
 
@@ -317,30 +320,34 @@ discord_remote_log("Goinglivebot","blue","removed old embeds posted to webhook",
 # main loop
 while True:
     try:
-        streamers = get_streamers()
-        for streamer in streamers:
-            rresponse,r,is_live = get_stream(streamer)
-            if not "200" in str(rresponse):
-                token = get_token()
+        streamers,streamer_check = get_streamers()
+        if streamer_check:
+            for streamer in streamers:
                 rresponse,r,is_live = get_stream(streamer)
-            if is_live == "live":
-                if exists(f"config/{streamer}.txt"):
-                    print(f"embed allready exsists for {streamer}, updating it")
-                    discord_remote_log("Goinglivebot","yellow",f"embed allready exsists for {streamer}, updating it",False)
-                    message_id_from_file = read_message_id(streamer)
-                    webhook_edit(r,message_id_from_file)
+                if not "200" in str(rresponse):
+                    token = get_token()
+                    rresponse,r,is_live = get_stream(streamer)
+                if is_live == "live":
+                    if exists(f"config/{streamer}.txt"):
+                        print(f"embed allready exsists for {streamer}, updating it")
+                        discord_remote_log("Goinglivebot","yellow",f"embed allready exsists for {streamer}, updating it",False)
+                        message_id_from_file = read_message_id(streamer)
+                        webhook_edit(r,message_id_from_file)
+                    else:
+                        print(f"no embed exsists for {streamer}, creating it")
+                        discord_remote_log("Goinglivebot","yellow",f"no embed exsists for {streamer}, creating it",False)
+                        message_id = webhook_send(r)
+                        save_message_id(streamer,message_id)
                 else:
-                    print(f"no embed exsists for {streamer}, creating it")
-                    discord_remote_log("Goinglivebot","yellow",f"no embed exsists for {streamer}, creating it",False)
-                    message_id = webhook_send(r)
-                    save_message_id(streamer,message_id)
-            else:
-                if exists(f"config/{streamer}.txt"):
-                    print(f"{streamer} is no longer live, deleting embed")
-                    discord_remote_log("Goinglivebot","yellow",f"{streamer} is no longer live, deleting embed",False)
-                    message_id_from_file = read_message_id(streamer)
-                    webhook_delete(message_id_from_file)
-                    remove_message_id_file(streamer)
+                    if exists(f"config/{streamer}.txt"):
+                        print(f"{streamer} is no longer live, deleting embed")
+                        discord_remote_log("Goinglivebot","yellow",f"{streamer} is no longer live, deleting embed",False)
+                        message_id_from_file = read_message_id(streamer)
+                        webhook_delete(message_id_from_file)
+                        remove_message_id_file(streamer)
+        else:
+            print(f"there was an issue getting streamers from url")
+            discord_remote_log("Goinglivebot","red",f"there was an issue getting streamers from url",True)
     except Exception as e:
         print(f"An exception occurred for streamer {streamer} : {str(e)}")
         discord_remote_log("Goinglivebot","red",f"An exception occurred for streamer {streamer} : {str(e)}",True)
