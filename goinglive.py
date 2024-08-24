@@ -248,8 +248,8 @@ def get_streamers():
         if "http" in streamers[0]:
             response = requests.get(streamers[0])
             streamers = response.text.splitlines()
-        if "200" not in str(response):
-            streamer_check = False
+            if "200" not in str(response):
+                streamer_check = False
     print(f"list of streamers to poll from: {streamers}")
     discord_remote_log("Goinglivebot","yellow",f"list of streamers to poll from: {streamers}",False)
     return(streamers, streamer_check)
