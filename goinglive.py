@@ -157,7 +157,7 @@ def get_token():
 
 # gets stream information from twitch api
 def get_stream(streamer): 
-    response=requests.get(f"https://api.twitch.tv/helix/streams?&user_login={streamer}", headers={'Authorization':f"Bearer {token}", 'Client-Id':twitch_api_id})
+    response=requests.get(f"https://api.twitch.tv/helix/streams?&user_id={streamer}", headers={'Authorization':f"Bearer {token}", 'Client-Id':twitch_api_id})
     print(f"tried to get streamer information with function get_stream for {streamer} with response: {response}")
     if "200" in str(response):
         if verbose >= 1:
