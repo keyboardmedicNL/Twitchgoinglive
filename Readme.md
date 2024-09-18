@@ -52,11 +52,11 @@ full:
     "gotifyurl": "url for your gotify server"
 }
 ```
-5. create a streamers.txt file in the config folder and add the username of every streamer you want to poll on a new line, alternativly add a url to a txt file that contains the list to poll
+5. create a streamers.txt file in the config folder and add the user id of every streamer you want to poll on a new line, alternativly add a url to a txt file that contains the list to poll (if you dont have the user id you can use https://www.streamweasels.com/tools/convert-twitch-username-to-user-id/ to get the id from the twitch api, alternativly there is a included getuserid.py script you can run in a terminal to get it yourself from the api)
 ```
-keyboardmedic
-dj_acidion
-backupiboh
+123456
+234567
+345678
 ```
 6. run the script:   
 on windows: with the included start.bat file for your version  
