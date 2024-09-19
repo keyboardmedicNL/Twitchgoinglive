@@ -62,10 +62,21 @@ full:
 on windows: with the included start.bat file for your version  
 on linux: in a terminal with ```python goinglive.py``` or ```python goinglivelite.py```
 
-* alternativly you can either build your own docker image with the included dockerfile or use mine with the following command (note: the docker version runs the full version and thus requires the full config)
+# docker
+alternativly you can either build your own docker image with the included dockerfile or use mine with the following command (note: the docker version runs the full version and thus requires the full config)
 ```
 docker run -it -d --name twitchgoinglive -v /path/to/config:/usr/src/app/config keyboardmedic/twitchgoinglive:latest
 ```
+to run the build in getuserid.py script from a docker container you can open a shell into the container with the following command   
+``` 
+docker exec -it twitchgoinglive sh
+```
+and then you excecute the script with the command   
+```
+python getuserid.py
+```
+to exit out of the shell press crtl+p followed by ctrl+q to escape from the shell   
+
 # how it works
 **main script**
 - loads the config.   
