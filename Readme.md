@@ -2,7 +2,7 @@
 please...
 
 # important
-the config format has changed between version 0.1.1 and 0.2, ensure you use the new config format or the script will not work!
+I have swapped to using user_id's instead of usernames for the script, if you a running a version with usernames please convert your streamers.txt to one with user_id's instead (step 5 in how to)
 
 # what is it
 a simple script that polls a list of twitch channels and posts a message to a discord webhook when they are live with a thumbnail and such. updates the message on a predefined schedule and deletes message when the stream goes offline, cleans up all old messages on restart to avoid double posts when the bot crashes.
@@ -71,7 +71,7 @@ docker run -it -d --name twitchgoinglive -v /path/to/config:/usr/src/app/config 
 - loads the config.   
 - launches the webserver and post server in seperate threads if selected in the config.
 - checks if token.txt is present in the config folder and reads it to load the auth token for twitch api calls, if not it runs the get_token function to request an auth token from twitch and saves it to token.txt
-- it gets the list of streamers to poll with the get_streamers function and checks if any txt files exsist in the config folder with streamer names with a saved messageid, if it finds any it will attempt to delete the messages on discord with the corresponding message id, it does this to avoid leaving old messages up between restarts
+- it gets the list of streamers to poll with the get_streamers function and checks if any txt files exsist in the config/embeds folder with streamer names with a saved messageid, if it finds any it will attempt to delete the messages on discord with the corresponding message id, it does this to avoid leaving old messages up between restarts
 - it then loops trough all the streamers and gets the stream information from the twitch api to see if they are live and to retrieve the needed data for the message
 - if a streamer is live it checks if a txt file with the streamers name exsists, if it does not exsist it posts a message to discord and creates a txt file with the name of the streamer wich holds the messageid of the message posted to discord, if the txt does exsist it reads it for the messageid and then updates the message on discord with that id
 - if a streamer is not live it checks if a txt file exsists with the streamers name and if it does it will read it for the message id and delete that message on discord.

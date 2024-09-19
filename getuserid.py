@@ -22,9 +22,10 @@ twitch_api_id= getpass("Twitch api id: ")
 print("please input your twitch api secret")
 twitch_api_secret = getpass("Twitch api secret: ")
 token = get_token()
-user_name = input("please input the user name you would like to get the id for: ")
-response=requests.get(f"https://api.twitch.tv/helix/users?login={user_name.lower()}", headers={'Authorization':f"Bearer {token}", 'Client-Id':twitch_api_id})
-print(f"response for get users from twitch is {response}")
-responsejson = response.json()
-user_id = responsejson["data"][0]["id"]
-print(f"the user id for {user_name} = {user_id}")
+while True:
+    user_name = input("please input the user name you would like to get the id for or press ctrl+c to stop this script at any time: ")
+    response=requests.get(f"https://api.twitch.tv/helix/users?login={user_name.lower()}", headers={'Authorization':f"Bearer {token}", 'Client-Id':twitch_api_id})
+    print(f"response for get users from twitch is {response}")
+    responsejson = response.json()
+    user_id = responsejson["data"][0]["id"]
+    print(f"the user id for {user_name} = {user_id}")

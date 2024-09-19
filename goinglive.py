@@ -6,6 +6,7 @@ from subprocess import call
 from os.path import exists
 import os
 import random
+import shutil
 
 # ===== webhook functions =====
 # webhook send to discord for goinglive message
@@ -216,7 +217,7 @@ def gotify(title,message,priority):
 
 # saves streamid to file
 def save_message_id(name,message_id):
-    fileName = f"config/{name}.txt"
+    fileName = f"config/embeds/{name}.txt"
     with open(fileName, 'w') as File:
         File.write(message_id)
     if verbose >= 1:
@@ -225,7 +226,7 @@ def save_message_id(name,message_id):
 
 # reads streamid from file
 def read_message_id(name):
-    fileName = f"config/{name}.txt"
+    fileName = f"config/embeds/{name}.txt"
     with open(fileName, 'r') as File:
         message_id = str(File.readline())
     if verbose >= 1:
@@ -235,7 +236,7 @@ def read_message_id(name):
 
 # remove file
 def remove_message_id_file(name):
-    os.remove(f"config/{name}.txt")
+    os.remove(f"config/embeds/{name}.txt")
     if verbose >= 1:
         print(f"removed file containing message id for embed for {name}.txt")
         discord_remote_log("Goinglivebot","blue",f"removed file containing message id for embed for {name}.txt",False)
@@ -305,17 +306,29 @@ else:
     token = get_token()
 
 # ===== main code =====
+# creates embeds folder if not exist allready
+if not exists("config/embeds"):
+    os.makedirs("config/embeds")
+    print("embed folder was not found so it was created")
+    discord_remote_log("Goinglivebot","blue","embed folder was not found so it was created",False)
 # cleans up old messages on start
 print("pulling list of streamers once to remove old messages")
 discord_remote_log("Goinglivebot","yellow","pulling list of streamers once to remove old messages",False)
 streamers = get_streamers()
 for streamer in streamers:
-    if exists(f"config/{streamer}.txt"):
+    if exists(f"config/embeds/{streamer}.txt"):
         message_id_from_file = read_message_id(streamer)
         webhook_delete(message_id_from_file)
         remove_message_id_file(streamer)
 print("removed old embeds posted to webhook")
-discord_remote_log("Goinglivebot","blue","removed old embeds posted to webhook",False)
+for filename in os.listdir("config/embeds"):
+    file_path = os.path.join("config/embeds", filename)
+    if os.path.isfile(file_path) or os.path.islink(file_path):
+        os.unlink(file_path)
+    elif os.path.isdir(file_path):
+        shutil.rmtree(file_path)
+print("removed all remaining files in config/embeds/")
+discord_remote_log("Goinglivebot","blue","removed old embeds posted to webhook and cleaned embeds folder",False)
 
 # main loop
 while True:
@@ -328,7 +341,7 @@ while True:
                     token = get_token()
                     rresponse,r,is_live = get_stream(streamer)
                 if is_live == "live":
-                    if exists(f"config/{streamer}.txt"):
+                    if exists(f"config/embeds/{streamer}.txt"):
                         print(f"embed allready exsists for {streamer}, updating it")
                         discord_remote_log("Goinglivebot","yellow",f"embed allready exsists for {streamer}, updating it",False)
                         message_id_from_file = read_message_id(streamer)
@@ -339,7 +352,7 @@ while True:
                         message_id = webhook_send(r)
                         save_message_id(streamer,message_id)
                 else:
-                    if exists(f"config/{streamer}.txt"):
+                    if exists(f"config/embeds/{streamer}.txt"):
                         print(f"{streamer} is no longer live, deleting embed")
                         discord_remote_log("Goinglivebot","yellow",f"{streamer} is no longer live, deleting embed",False)
                         message_id_from_file = read_message_id(streamer)

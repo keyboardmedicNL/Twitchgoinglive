@@ -4,6 +4,7 @@ import json
 from os.path import exists
 import os
 import random
+import shutil
 
 # ===== webhook functions =====
 # webhook send to discord for goinglive message
@@ -136,7 +137,7 @@ def get_token():
 
 # gets stream information from twitch api
 def get_stream(streamer): 
-    response=requests.get(f"https://api.twitch.tv/helix/streams?&user_login={streamer}", headers={'Authorization':f"Bearer {token}", 'Client-Id':twitch_api_id})
+    response=requests.get(f"https://api.twitch.tv/helix/streams?&user_id={streamer}", headers={'Authorization':f"Bearer {token}", 'Client-Id':twitch_api_id})
     print(f"tried to get streamer information with function get_stream for {streamer} with response: {response}")
     responsejson = response.json()
     try:
@@ -149,14 +150,14 @@ def get_stream(streamer):
 
 # saves streamid to file
 def save_message_id(name,message_id):
-    fileName = f"config/{name}.txt"
+    fileName = f"config/embeds/{name}.txt"
     with open(fileName, 'w') as File:
         File.write(message_id)
     print(f"message id: {message_id} saved in file {name}.txt")
 
 # reads streamid from file
 def read_message_id(name):
-    fileName = f"config/{name}.txt"
+    fileName = f"config/embeds/{name}.txt"
     with open(fileName, 'r') as File:
         message_id = str(File.readline())
     print(f"message id: {message_id} read from {name}.txt")
@@ -164,7 +165,7 @@ def read_message_id(name):
 
 # remove file
 def remove_message_id_file(name):
-    os.remove(f"config/{name}.txt")
+    os.remove(f"config/embeds/{name}.txt")
     print(f"removed file containing the message id for the embed for {name}.txt")
 
 # gets list of streamers to poll
@@ -199,15 +200,26 @@ else:
     token = get_token()
 
 # ===== main code =====
+# creates embeds folder
+if not exists("config/embeds"):
+    os.makedirs("config/embeds")
+    print("embed folder was not found so it was created")
 # cleans up old messages on start
 print("pulling list of streamers once to remove old message")
 streamers = get_streamers()
 for streamer in streamers:
-    if exists(f"config/{streamer}.txt"):
+    if exists(f"config/embeds/{streamer}.txt"):
         message_id_from_file = read_message_id(streamer)
         webhook_delete(message_id_from_file)
         remove_message_id_file(streamer)
 print("removed old messages posted to webhook")
+for filename in os.listdir("config/embeds"):
+    file_path = os.path.join("config/embeds", filename)
+    if os.path.isfile(file_path) or os.path.islink(file_path):
+        os.unlink(file_path)
+    elif os.path.isdir(file_path):
+        shutil.rmtree(file_path)
+print("removed all remaining files in config/embeds/")
 
 # main loop
 while True:
@@ -219,7 +231,7 @@ while True:
                 token = get_token()
                 rresponse,r,is_live = get_stream(streamer)
             if is_live == "live":
-                if exists(f"config/{streamer}.txt"):
+                if exists(f"config/embeds/{streamer}.txt"):
                     print(f"embed allready exsists for {streamer}, updating it")
                     message_id_from_file = read_message_id(streamer)
                     webhook_edit(r,message_id_from_file)
@@ -228,7 +240,7 @@ while True:
                     message_id = webhook_send(r)
                     save_message_id(streamer,message_id)
             else:
-                if exists(f"config/{streamer}.txt"):
+                if exists(f"config/embeds/{streamer}.txt"):
                     print(f"{streamer} is no longer live, deleting embed")
                     message_id_from_file = read_message_id(streamer)
                     webhook_delete(message_id_from_file)
