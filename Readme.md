@@ -3,6 +3,7 @@ please...
 
 # important
 I have swapped to using user_id's instead of usernames for the script, if you a running a version with usernames please convert your streamers.txt to one with user_id's instead (step 5 in how to)
+A new line in the config has been added called categories for the full version, see below
 
 # what is it
 a simple script that polls a list of twitch channels and posts a message to a discord webhook when they are live with a thumbnail and such. updates the message on a predefined schedule and deletes message when the stream goes offline, cleans up all old messages on restart to avoid double posts when the bot crashes.
@@ -49,7 +50,8 @@ full:
     "pingid": "user or group id to ping incase of an error for remote logging OPTIONAL"
     "verbose": "true or false, wether or not the script outputs all logging messages or just the basics",
     "use_gotify": "true or false",
-    "gotifyurl": "url for your gotify server"
+    "gotifyurl": "url for your gotify server",
+    "categories: ["category 1","category 2"](allows filtering by categories, anything not in this category will NOT be posted, alternativly you can make it an empty list by filling it in as followed ' "categories": [] ' categories MUST be lower case)
 }
 ```
 5. create a streamers.txt file in the config folder and add the user id of every streamer you want to poll on a new line, alternativly add a url to a txt file that contains the list to poll (if you dont have the user id you can use https://www.streamweasels.com/tools/convert-twitch-username-to-user-id/ to get the id from the twitch api, alternativly there is a included getuserid.py script you can run in a terminal to get it yourself from the api)
@@ -84,7 +86,7 @@ to exit out of the shell press crtl+p followed by ctrl+q to escape from the shel
 - checks if token.txt is present in the config folder and reads it to load the auth token for twitch api calls, if not it runs the get_token function to request an auth token from twitch and saves it to token.txt
 - it gets the list of streamers to poll with the get_streamers function and checks if any txt files exsist in the config/embeds folder with streamer names with a saved messageid, if it finds any it will attempt to delete the messages on discord with the corresponding message id, it does this to avoid leaving old messages up between restarts
 - it then loops trough all the streamers and gets the stream information from the twitch api to see if they are live and to retrieve the needed data for the message
-- if a streamer is live it checks if a txt file with the streamers name exsists, if it does not exsist it posts a message to discord and creates a txt file with the name of the streamer wich holds the messageid of the message posted to discord, if the txt does exsist it reads it for the messageid and then updates the message on discord with that id
+- if a streamer is live and is in an allowed category it checks if a txt file with the streamers name exsists, if it does not exsist it posts a message to discord and creates a txt file with the name of the streamer wich holds the messageid of the message posted to discord, if the txt does exsist it reads it for the messageid and then updates the message on discord with that id
 - if a streamer is not live it checks if a txt file exsists with the streamers name and if it does it will read it for the message id and delete that message on discord.
 - it then waits for the preconfigured time and loops back to looping trough the streamers.
 

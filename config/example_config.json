@@ -15,5 +15,6 @@
     "pingid": "role or userid (not username but numerical id) for discord pings",
     "vebose": "0, 1 or 2 (0 is basic logging, 1 is extensive logging, 2 is extensive logging with remote logging responses)",
     "use_gotify": "true or false",
-    "gotifyurl": "url for your gotify server"
+    "gotifyurl": "url for your gotify server",
+    "categories":[]
 }
