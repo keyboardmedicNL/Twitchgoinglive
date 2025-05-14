@@ -40,6 +40,10 @@ def webhook_send(rr):
                 {
                     "name": "Twitch:",
                     "value": f"[Watch stream](https://www.twitch.tv/{user})"
+                },
+                {
+                "name": "",
+                "value": "[***get this bot***](https://github.com/keyboardmedicNL/Twitchgoinglive)"
                 }
             ],
             "timestamp": started,
@@ -94,6 +98,10 @@ def webhook_edit(rr,message_id):
                 {
                     "name": "Twitch:",
                     "value": f"[Watch stream](https://www.twitch.tv/{user})"
+                },
+                {
+                "name": "",
+                "value": "[***get this bot***](https://github.com/keyboardmedicNL/Twitchgoinglive)"
                 }
             ],
             "timestamp": started,
