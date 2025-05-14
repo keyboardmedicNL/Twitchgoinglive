@@ -20,7 +20,7 @@ def webhook_send(rr):
 
     if response["data"][0]["game_name"] == "":
         response["data"][0]["game_name"] = "none"
-    data_for_hook = {"embeds": [
+    data_for_hook = {"content": custom_message,"embeds": [
             {
             "title": f":red_circle: {username} is now live!",
             "description": title,
@@ -74,7 +74,7 @@ def webhook_edit(rr,message_id):
     if response["data"][0]["game_name"] == "":
         response["data"][0]["game_name"] = "none"
     
-    data_for_hook = {"embeds": [
+    data_for_hook = {"content": custom_message,"embeds": [
             {
             "title": f":red_circle: {username} is now live!",
             "description": title,
@@ -188,6 +188,7 @@ with open("config/config.json") as config:
     twitch_api_secret = str(config_json["twitch_api_secret"])
     webhook_url = str(config_json["discord_webhook_url"])
     poll_interval = int(config_json["poll_interval"])
+    custom_message = str(config_json["message"])
 print("succesfully loaded config")
 
 #opens file to get auth token

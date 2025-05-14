@@ -22,7 +22,7 @@ def webhook_send(rr):
 
     if response["data"][0]["game_name"] == "":
         response["data"][0]["game_name"] = "none"
-    data_for_hook = {"embeds": [
+    data_for_hook = {"content": custom_message,"embeds": [
             {
             "title": f":red_circle: {username} is now live!",
             "description": title,
@@ -81,7 +81,7 @@ def webhook_edit(rr,message_id):
     if response["data"][0]["game_name"] == "":
         response["data"][0]["game_name"] = "none"
     
-    data_for_hook = {"embeds": [
+    data_for_hook = {"content": custom_message, "embeds": [
             {
             "title": f":red_circle: {username} is now live!",
             "description": title,
@@ -272,6 +272,8 @@ with open("config/config.json") as config:
     use_web_server = str(config_json["use_web_server"])
     use_remote_post = str(config_json["use_remote_post"])
     use_gotify = str(config_json["use_gotify"])
+    if use_gotify.lower() == "true":
+        gotifyurl = str(config_json["gotifyurl"])
     ping_id = str(config_json["pingid"])
     verbose = int(config_json["verbose"])
     gotifyurl = str(config_json["gotifyurl"])
@@ -279,6 +281,7 @@ with open("config/config.json") as config:
     if use_discord_logs.lower() == "true":
         discord_remote_log_url = str(config_json["discord_remote_log_url"])
     categories = config_json["categories"]
+    custom_message = str(config_json["message"])
 discord_remote_log("Goinglivebot","blue","succesfully loaded config",False)
 print("succesfully loaded config")
 
