@@ -28,6 +28,7 @@ lite:
     "twitch_api_secret": "Twitch api token",
     "discord_webhook_url": "webhook to post main messages to",
     "poll_interval": time in minutes between polls,
+    "message":"a custom message to display with the embed, can be used to ping either @everyone or <@&roleid> to ping a role, OPTIONAL leave blank when not used"
 }
 ```
 
@@ -47,11 +48,12 @@ full:
     "remote_http_server_url": "url of remote monitoring server OPTIONAL",
     "bot_name": "bot name to send to remote monitoring server OPTIONAL",
     "post_interval": "timeout in minutes to send message to monitoring server OPTIONAL",
-    "pingid": "user or group id to ping incase of an error for remote logging OPTIONAL"
-    "verbose": "true or false, wether or not the script outputs all logging messages or just the basics",
+    "pingid": "role or userid (not username but numerical id) for discord pings (for role add & before the string of numbers)",
+    "vebose": "0, 1 or 2 (0 is basic logging, 1 is extensive logging, 2 is extensive logging with remote logging responses)",
     "use_gotify": "true or false",
-    "gotifyurl": "url for your gotify server",
-    "categories: ["category 1","category 2"](allows filtering by categories, anything not in this category will NOT be posted, alternativly you can make it an empty list by filling it in as followed ' "categories": [] ' categories MUST be lower case)
+    "gotifyurl": "url for your gotify server OPTIONAL",
+    "categories":["list","of","allowed","categories","Leave as [] if you dont want to use filtering for categories"],
+    "message":"a custom message to display with the embed, can be used to ping either @everyone or <@&roleid> to ping a role, OPTIONAL leave blank when not used"
 }
 ```
 5. create a streamers.txt file in the config folder and add the user id of every streamer you want to poll on a new line, alternativly add a url to a txt file that contains the list to poll (if you dont have the user id you can use https://www.streamweasels.com/tools/convert-twitch-username-to-user-id/ to get the id from the twitch api, alternativly there is a included getuserid.py script you can run in a terminal to get it yourself from the api)
