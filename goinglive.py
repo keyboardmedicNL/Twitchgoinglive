@@ -142,6 +142,34 @@ def webhook_delete(message_id):
         discord_remote_log("Goinglivebot","red",f"attempted to delete message on discord with id: {message_id} for {streamer} with name {streamer_name}, response is {rl}",True)
         gotify("Clipbot",f"attempted to delete message on discord with id: {message_id} for {streamer} with name {streamer_name}, response is {rl}","5")
 
+def webhook_offline(message_id,filename):
+    username = filename
+    
+    data_for_hook = {"content": custom_message, "embeds": [
+            {
+            "title": f":x: {username} has gone offline!",
+            "description": "",
+            "url": f"https://www.twitch.tv/{username.lower()}",
+            "color": 6570404,
+            "fields": [
+                {
+                "name": "",
+                "value": "[***get this bot***](https://github.com/keyboardmedicNL/Twitchgoinglive)"
+                }
+            ],
+            }
+        ]}
+    rl = requests.patch(f"{webhook_url}/messages/{message_id}", json=data_for_hook, params={'wait': 'true'})
+    if "200" in str(rl):
+        if verbose >= 1:
+            print(f"updating to offline message to discord with id: {message_id} for {streamer} with name {username}, response is {rl}")
+            discord_remote_log("Goinglivebot","green",f"updating to offline message to discord with discord id: {message_id} for {streamer} with name {username}, response is {rl}",False)
+    else:
+        print(f"attempted to update offline message to discord with id: {message_id} for {streamer} with name {username}, response is {rl}")
+        discord_remote_log("Goinglivebot","red",f"attempted to update offlinee message to discord with discord id: {message_id} for {streamer} with name {username}, response is {rl}",True)
+        gotify("Clipbot",f"attempted to update offline message to discord with discord id: {message_id} for {streamer} with name {username}, response is {rl}","5")
+
+
 # ===== twitch functions =====
 # renews token used for twitch api calls
 def get_token():
@@ -228,23 +256,25 @@ def gotify(title,message,priority):
         time.sleep(1)
 
 # saves streamid to file
-def save_message_id(name,message_id):
+def save_message_id(name,message_id,user_login):
     fileName = f"config/embeds/{name}.txt"
     with open(fileName, 'w') as File:
-        File.write(message_id)
+        File.write(message_id + '\n' + user_login)
     if verbose >= 1:
-        print(f"message id: {message_id} saved in file {name}.txt")
-        discord_remote_log("Goinglivebot","blue",f"message id: {message_id} saved in file {name}.txt",False)
+        print(f"message id: {message_id} and {user_login} saved in file {name}.txt")
+        discord_remote_log("Goinglivebot","blue",f"message id: {message_id} and {user_login} saved in file {name}.txt",False)
 
 # reads streamid from file
 def read_message_id(name):
     fileName = f"config/embeds/{name}.txt"
     with open(fileName, 'r') as File:
         message_id = str(File.readline())
+        message_id = message_id.strip("\n")
+        name_in_file = str(File.readline())
     if verbose >= 1:
-        print(f"message id : {message_id} read from {name}.txt")
-        discord_remote_log("Goinglivebot","blue",f"message id: {message_id} read from {name}.txt",False)
-    return(message_id)
+        print(f"message id : {message_id} and {name_in_file} read from {name}.txt")
+        discord_remote_log("Goinglivebot","blue",f"message id: {message_id} and {name_in_file} read from {name}.txt",False)
+    return(message_id,name_in_file)
 
 # remove file
 def remove_message_id_file(name):
@@ -290,6 +320,11 @@ with open("config/config.json") as config:
         discord_remote_log_url = str(config_json["discord_remote_log_url"])
     categories = config_json["categories"]
     custom_message = str(config_json["message"])
+    keep_messages = str(config_json["keep_messages_when_offline"])
+    if keep_messages.lower() == "true":
+        keep_messages = True
+    else:
+        keep_messages = False
 discord_remote_log("Goinglivebot","blue","succesfully loaded config",False)
 print("succesfully loaded config")
 
@@ -328,16 +363,19 @@ if not exists("config/embeds"):
     print("embed folder was not found so it was created")
     discord_remote_log("Goinglivebot","blue","embed folder was not found so it was created",False)
 # cleans up old messages on start
-print("pulling list of streamers once to remove old messages")
-discord_remote_log("Goinglivebot","yellow","pulling list of streamers once to remove old messages",False)
+print("pulling list of streamers once to clean up old messages")
+discord_remote_log("Goinglivebot","yellow","pulling list of streamers once to clean up old messages",False)
 streamers,streamer_check = get_streamers()
 for streamer in streamers:
     if exists(f"config/embeds/{streamer}.txt"):
         streamer_name = "unkown"
-        message_id_from_file = read_message_id(streamer)
-        webhook_delete(message_id_from_file)
+        message_id_from_file,name_from_file = read_message_id(streamer)
+        if keep_messages:
+            webhook_offline(message_id_from_file,name_from_file)
+        else:
+            webhook_delete(message_id_from_file)
         remove_message_id_file(streamer)
-print("removed old embeds posted to webhook")
+print("cleaned up old embeds posted to webhook")
 for filename in os.listdir("config/embeds"):
     file_path = os.path.join("config/embeds", filename)
     if os.path.isfile(file_path) or os.path.islink(file_path):
@@ -345,7 +383,7 @@ for filename in os.listdir("config/embeds"):
     elif os.path.isdir(file_path):
         shutil.rmtree(file_path)
 print("removed all remaining files in config/embeds/")
-discord_remote_log("Goinglivebot","blue","removed old embeds posted to webhook and cleaned embeds folder",False)
+discord_remote_log("Goinglivebot","blue","cleaned up old embeds posted to webhook and cleaned embeds folder",False)
 
 # main loop
 while True:
@@ -364,19 +402,22 @@ while True:
                     if exists(f"config/embeds/{streamer}.txt"):
                         print(f"embed allready exsists for {streamer} with name {streamer_name}, updating it")
                         discord_remote_log("Goinglivebot","yellow",f"embed allready exsists for {streamer} with name {streamer_name}, updating it",False)
-                        message_id_from_file = read_message_id(streamer)
+                        message_id_from_file,name_from_file = read_message_id(streamer)
                         webhook_edit(r,message_id_from_file)
                     else:
                         print(f"no embed exsists for {streamer} with name {streamer_name}, creating it")
                         discord_remote_log("Goinglivebot","yellow",f"no embed exsists for {streamer} with name {streamer_name}, creating it",False)
                         message_id = webhook_send(r)
-                        save_message_id(streamer,message_id)
+                        save_message_id(streamer,message_id,streamer_name)
                 else:
                     if exists(f"config/embeds/{streamer}.txt"):
-                        print(f"{streamer} with name {streamer_name} is no longer live, deleting embed")
-                        discord_remote_log("Goinglivebot","yellow",f"{streamer} with name {streamer_name} is no longer live, deleting embed",False)
-                        message_id_from_file = read_message_id(streamer)
-                        webhook_delete(message_id_from_file)
+                        print(f"{streamer} with name {streamer_name} is no longer live")
+                        discord_remote_log("Goinglivebot","yellow",f"{streamer} with name {streamer_name} is no longer live",False)
+                        message_id_from_file,name_from_file = read_message_id(streamer)
+                        if keep_messages:
+                            webhook_offline(message_id_from_file,name_from_file)
+                        else:
+                            webhook_delete(message_id_from_file)
                         remove_message_id_file(streamer)
         else:
             print(f"there was an issue getting streamers from url")

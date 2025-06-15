@@ -3,12 +3,14 @@ please...
 
 # important
 I have swapped to using user_id's instead of usernames for the script, if you a running a version with usernames please convert your streamers.txt to one with user_id's instead (step 5 in how to)
-A new line in the config has been added called categories for the full version, see below
+Multiple new lines have been added in the config, please ensure your new config is up to date.
 
 # what is it
-a simple script that polls a list of twitch channels and posts a message to a discord webhook when they are live with a thumbnail and such. updates the message on a predefined schedule and deletes message when the stream goes offline, cleans up all old messages on restart to avoid double posts when the bot crashes.
+a simple script that polls a list of twitch channels and posts a message to a discord webhook when they are live with a thumbnail and such. updates the message on a predefined schedule and deletes message when the stream goes offline or changes it to an offline message, cleans up all old messages on restart to avoid double posts when the bot crashes.
 
 ![Alt text](screenshot.png?raw=true "Title")
+
+![Alt text](screenshot_offline.png?raw=true "Title")
 
 **the script currently comes with 2 versions:**   
 - the lite version, wich just contains the script to check for livestreams and posts them to discord aswell.    
@@ -28,7 +30,8 @@ lite:
     "twitch_api_secret": "Twitch api token",
     "discord_webhook_url": "webhook to post main messages to",
     "poll_interval": time in minutes between polls,
-    "message":"a custom message to display with the embed, can be used to ping either @everyone or <@&roleid> to ping a role, OPTIONAL leave blank when not used"
+    "message":"a custom message to display with the embed, can be used to ping either @everyone or <@&roleid> to ping a role, OPTIONAL leave blank when not used",
+    "keep_messages_when_offline": "true or false, deletes embed or changes embed to an offline message"
 }
 ```
 
@@ -53,7 +56,8 @@ full:
     "use_gotify": "true or false",
     "gotifyurl": "url for your gotify server OPTIONAL",
     "categories":["list","of","allowed","categories","Leave as [] if you dont want to use filtering for categories"],
-    "message":"a custom message to display with the embed, can be used to ping either @everyone or <@&roleid> to ping a role, OPTIONAL leave blank when not used"
+    "message":"a custom message to display with the embed, can be used to ping either @everyone or <@&roleid> to ping a role, OPTIONAL leave blank when not used",
+    "keep_messages_when_offline": "true or false, deletes embed or changes embed to an offline message"
 }
 ```
 5. create a streamers.txt file in the config folder and add the user id of every streamer you want to poll on a new line, alternativly add a url to a txt file that contains the list to poll (if you dont have the user id you can use https://www.streamweasels.com/tools/convert-twitch-username-to-user-id/ to get the id from the twitch api, alternativly there is a included getuserid.py script you can run in a terminal to get it yourself from the api)
@@ -89,7 +93,7 @@ to exit out of the shell press crtl+p followed by ctrl+q to escape from the shel
 - it gets the list of streamers to poll with the get_streamers function and checks if any txt files exsist in the config/embeds folder with streamer names with a saved messageid, if it finds any it will attempt to delete the messages on discord with the corresponding message id, it does this to avoid leaving old messages up between restarts
 - it then loops trough all the streamers and gets the stream information from the twitch api to see if they are live and to retrieve the needed data for the message
 - if a streamer is live and is in an allowed category it checks if a txt file with the streamers name exsists, if it does not exsist it posts a message to discord and creates a txt file with the name of the streamer wich holds the messageid of the message posted to discord, if the txt does exsist it reads it for the messageid and then updates the message on discord with that id
-- if a streamer is not live it checks if a txt file exsists with the streamers name and if it does it will read it for the message id and delete that message on discord.
+- if a streamer is not live it checks if a txt file exsists with the streamers name and if it does it will read it for the message id and delete that message on discord or turn it into an offline message.
 - it then waits for the preconfigured time and loops back to looping trough the streamers.
 
 **webserver**

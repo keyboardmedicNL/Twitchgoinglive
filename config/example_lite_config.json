@@ -3,5 +3,6 @@
     "twitch_api_secret": "Twitch api token",
     "discord_webhook_url": "webhook to post main messages to",
     "poll_interval": "time in minutes between polls",
-    "message":"a custom message to display with the embed, can be used to ping either @everyone or <@&roleid> to ping a role, OPTIONAL leave blank when not used"
+    "message":"a custom message to display with the embed, can be used to ping either @everyone or <@&roleid> to ping a role, OPTIONAL leave blank when not used",
+    "keep_messages_when_offline": "true or false, deletes embed or changes embed to an offline message"
 }

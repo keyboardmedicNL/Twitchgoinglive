@@ -119,6 +119,29 @@ def webhook_edit(rr,message_id):
     else:
         print(f"attempted to update message to discord with id: {message_id} for {streamer}, response is {rl}")
 
+def webhook_offline(message_id,filename):
+    username = filename
+    
+    data_for_hook = {"content": custom_message, "embeds": [
+            {
+            "title": f":x: {username} has gone offline!",
+            "description": "",
+            "url": f"https://www.twitch.tv/{username.lower()}",
+            "color": 6570404,
+            "fields": [
+                {
+                "name": "",
+                "value": "[***get this bot***](https://github.com/keyboardmedicNL/Twitchgoinglive)"
+                }
+            ],
+            }
+        ]}
+    rl = requests.patch(f"{webhook_url}/messages/{message_id}", json=data_for_hook, params={'wait': 'true'})
+    if "200" in str(rl):
+            print(f"updating to offline message to discord with id: {message_id} for {streamer} with name {username}, response is {rl}")
+    else:
+        print(f"attempted to update offline message to discord with id: {message_id} for {streamer} with name {username}, response is {rl}")
+
 # deletes discord webhook message
 def webhook_delete(message_id):
     rl = requests.delete(f"{webhook_url}/messages/{message_id}", params={'wait': 'true'})
@@ -150,26 +173,30 @@ def get_stream(streamer):
     responsejson = response.json()
     try:
         is_live = responsejson["data"][0]["type"]
+        streamer_name = responsejson["data"][0]["user_name"]
     except:
         is_live = ""
-    return(response, responsejson, is_live)
+        streamer_name = ""
+    return(response, responsejson, is_live, streamer_name)
 
 # ===== other functions =====
 
 # saves streamid to file
-def save_message_id(name,message_id):
+def save_message_id(name,message_id,user_login):
     fileName = f"config/embeds/{name}.txt"
     with open(fileName, 'w') as File:
-        File.write(message_id)
-    print(f"message id: {message_id} saved in file {name}.txt")
+        File.write(message_id + '\n' + user_login)
+        print(f"message id: {message_id} and {user_login} saved in file {name}.txt")
 
 # reads streamid from file
 def read_message_id(name):
     fileName = f"config/embeds/{name}.txt"
     with open(fileName, 'r') as File:
         message_id = str(File.readline())
-    print(f"message id: {message_id} read from {name}.txt")
-    return(message_id)
+        message_id = message_id.strip("\n")
+        name_in_file = str(File.readline())
+    print(f"message id : {message_id} and {name_in_file} read from {name}.txt")
+    return(message_id,name_in_file)
 
 # remove file
 def remove_message_id_file(name):
@@ -197,6 +224,11 @@ with open("config/config.json") as config:
     webhook_url = str(config_json["discord_webhook_url"])
     poll_interval = int(config_json["poll_interval"])
     custom_message = str(config_json["message"])
+    keep_messages = str(config_json["keep_messages_when_offline"])
+    if keep_messages.lower() == "true":
+        keep_messages = True
+    else:
+        keep_messages = False
 print("succesfully loaded config")
 
 #opens file to get auth token
@@ -214,14 +246,17 @@ if not exists("config/embeds"):
     os.makedirs("config/embeds")
     print("embed folder was not found so it was created")
 # cleans up old messages on start
-print("pulling list of streamers once to remove old message")
+print("pulling list of streamers once to clean up old message")
 streamers = get_streamers()
 for streamer in streamers:
     if exists(f"config/embeds/{streamer}.txt"):
-        message_id_from_file = read_message_id(streamer)
-        webhook_delete(message_id_from_file)
+        message_id_from_file,name_from_file = read_message_id(streamer)
+        if keep_messages:
+            webhook_offline(message_id_from_file,name_from_file)
+        else:
+            webhook_delete(message_id_from_file)
         remove_message_id_file(streamer)
-print("removed old messages posted to webhook")
+print("cleaned up old messages posted to webhook")
 for filename in os.listdir("config/embeds"):
     file_path = os.path.join("config/embeds", filename)
     if os.path.isfile(file_path) or os.path.islink(file_path):
@@ -235,7 +270,7 @@ while True:
     try:
         streamers = get_streamers()
         for streamer in streamers:
-            rresponse,r,is_live = get_stream(streamer)
+            rresponse,r,is_live,streamer_name = get_stream(streamer)
             if not "200" in str(rresponse):
                 token = get_token()
                 rresponse,r,is_live = get_stream(streamer)
@@ -247,12 +282,15 @@ while True:
                 else:
                     print(f"no embed exsists for {streamer}, creating it")
                     message_id = webhook_send(r)
-                    save_message_id(streamer,message_id)
+                    save_message_id(streamer,message_id,streamer_name)
             else:
                 if exists(f"config/embeds/{streamer}.txt"):
                     print(f"{streamer} is no longer live, deleting embed")
-                    message_id_from_file = read_message_id(streamer)
-                    webhook_delete(message_id_from_file)
+                    message_id_from_file,name_from_file = read_message_id(streamer)
+                    if keep_messages:
+                        webhook_offline(message_id_from_file,name_from_file)
+                    else:
+                        webhook_delete(message_id_from_file)
                     remove_message_id_file(streamer)
     except Exception as e:
         print("An exception occurred in the main loop: ", str(e))
