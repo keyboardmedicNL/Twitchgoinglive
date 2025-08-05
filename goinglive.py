@@ -69,7 +69,7 @@ def discord_webhook_send(streamer_data: dict ) -> str:
     else:
         print(f"attempted to post message to discord with id: {message_id} for {streamer} with name {streamer_name}, response is {send_request_to_discord}")
         discord_remote_log("Goinglivebot","red",f"attempted to post message to discord with discord id: {message_id} for {streamer} with name {streamer_name}, response is {send_request_to_discord}",True)
-        gotify("Clipbot",f"attempted to post message to discord with discord id: {message_id} for {streamer} with name {streamer_name}, response is {send_request_to_discord}","5")
+        send_gotify_notification("Clipbot",f"attempted to post message to discord with discord id: {message_id} for {streamer} with name {streamer_name}, response is {send_request_to_discord}","5")
         
     return(message_id)
     
@@ -131,28 +131,26 @@ def discord_webhook_edit(streamer_data: dict,message_id: str):
     else:
         print(f"attempted to update message to discord with id: {message_id} for {streamer} with name {streamer_name}, response is {edit_request_to_discord}")
         discord_remote_log("Goinglivebot","red",f"attempted to update message to discord with discord id: {message_id} for {streamer} with name {streamer_name}, response is {edit_request_to_discord}",True)
-        gotify("Clipbot",f"attempted to update message to discord with discord id: {message_id} for {streamer} with name {streamer_name}, response is {edit_request_to_discord}","5")
+        send_gotify_notification("Clipbot",f"attempted to update message to discord with discord id: {message_id} for {streamer} with name {streamer_name}, response is {edit_request_to_discord}","5")
 
 # deletes discord webhook message
-def discord_webhook_delete(message_id):
+def discord_webhook_delete(message_id: str):
     delete_request_to_discord = requests.delete(f"{webhook_url}/messages/{message_id}", params={'wait': 'true'})
-    if "204" in str(delete_request_to_discord):
+    if delete_request_to_discord.ok():
         if verbose >= 1:
             print(f"deleting message om discord with id: {message_id} for {streamer} with name {streamer_name}, response is {delete_request_to_discord}")
             discord_remote_log("Goinglivebot","green",f"deleting message om discord with id: {message_id} for {streamer} with name {streamer_name}, response is {delete_request_to_discord}",False)
     else:
         print(f"attempted to delete message on discord with id: {message_id} for {streamer} with name {streamer_name}, response is {delete_request_to_discord}")
         discord_remote_log("Goinglivebot","red",f"attempted to delete message on discord with id: {message_id} for {streamer} with name {streamer_name}, response is {delete_request_to_discord}",True)
-        gotify("Clipbot",f"attempted to delete message on discord with id: {message_id} for {streamer} with name {streamer_name}, response is {delete_request_to_discord}","5")
+        send_gotify_notification("Clipbot",f"attempted to delete message on discord with id: {message_id} for {streamer} with name {streamer_name}, response is {delete_request_to_discord}","5")
 
-def webhook_offline(message_id,filename):
-    username = filename
-    
+def webhook_offline(message_id: str ,filename: str):
     data_to_send_to_webhook = {"content": custom_message, "embeds": [
             {
-            "title": f":x: {username} has gone offline!",
+            "title": f":x: {filename} has gone offline!",
             "description": "",
-            "url": f"https://www.twitch.tv/{username.lower()}",
+            "url": f"https://www.twitch.tv/{filename.lower()}",
             "color": 6570404,
             "fields": [
                 {
@@ -162,50 +160,57 @@ def webhook_offline(message_id,filename):
             ],
             }
         ]}
+    
     edit_to_offline_request_to_discord = requests.patch(f"{webhook_url}/messages/{message_id}", json=data_to_send_to_webhook, params={'wait': 'true'})
-    if "200" in str(edit_to_offline_request_to_discord):
+
+    if edit_to_offline_request_to_discord.ok():
         if verbose >= 1:
             print(f"updating to offline message to discord with id: {message_id} for {streamer} with name {username}, response is {edit_to_offline_request_to_discord}")
             discord_remote_log("Goinglivebot","green",f"updating to offline message to discord with discord id: {message_id} for {streamer} with name {username}, response is {edit_to_offline_request_to_discord}",False)
     else:
         print(f"attempted to update offline message to discord with id: {message_id} for {streamer} with name {username}, response is {edit_to_offline_request_to_discord}")
         discord_remote_log("Goinglivebot","red",f"attempted to update offlinee message to discord with discord id: {message_id} for {streamer} with name {username}, response is {edit_to_offline_request_to_discord}",True)
-        gotify("Clipbot",f"attempted to update offline message to discord with discord id: {message_id} for {streamer} with name {username}, response is {edit_to_offline_request_to_discord}","5")
+        send_gotify_notification("Clipbot",f"attempted to update offline message to discord with discord id: {message_id} for {streamer} with name {username}, response is {edit_to_offline_request_to_discord}","5")
 
 
 # ===== twitch functions =====
 # renews token used for twitch api calls
-def get_token_from_twitch_api():
+def get_token_from_twitch_api() -> str:
         if verbose >= 1: 
             print("Requesting new api auth token from twitch")
             discord_remote_log("Goinglivebot","yellow","Requesting new api auth token from twitch",False)
+
         get_token_from_twitch_request=requests.post("https://id.twitch.tv/oauth2/token", json={"client_id" : str(twitch_api_id), "client_secret" : str(twitch_api_secret), "grant_type":"client_credentials"})
-        if "200" in str(get_token_from_twitch_request):
+        
+        if get_token_from_twitch_request.ok():
             get_token_from_twitch_json = get_token_from_twitch_request.json()
             token_from_twitch = get_token_from_twitch_json["access_token"]
             if verbose >= 1:
-                print(f"new twitch api auth token is: {token}")
+                print(f"new twitch api auth token is: {token_from_twitch}")
                 discord_remote_log("Goinglivebot","green",f"new twitch api auth token recieved",False)
             with open(r'config/token.txt', 'w') as token_file:
-                token_file.write("%s\n" % token)
+                token_file.write("%s\n" % token_from_twitch)
         else:
             print(f"unable to request new twitch api auth token with response: {get_token_from_twitch_request}")
             discord_remote_log("Goinglivebot","red",f"unable to request new twitch api auth token with response: {get_token_from_twitch_request}",True)
-            gotify("Clipbot",f"unable to request new twitch api auth token with response: {get_token_from_twitch_request}","5")
+            send_gotify_notification("Clipbot",f"unable to request new twitch api auth token with response: {get_token_from_twitch_request}","5")
             token_from_twitch = "empty"
         return(token_from_twitch)
 
 # gets stream information from twitch api
-def get_stream_json_from_twitch(streamer): 
+def get_stream_json_from_twitch(streamer: str) -> tuple[dict, dict, str, str, str]: 
     get_stream_json_from_twitch_request=requests.get(f"https://api.twitch.tv/helix/streams?&user_id={streamer}", headers={'Authorization':f"Bearer {token}", 'Client-Id':twitch_api_id})
     print(f"tried to get streamer information with function get_stream_json_from_twitch for {streamer} with response: {get_stream_json_from_twitch_request}")
-    if "200" in str(get_stream_json_from_twitch_request):
+
+    if get_stream_json_from_twitch_request.ok():
         if verbose >= 1:
             discord_remote_log("Goinglivebot","green",f"got streamer information with function get_stream_json_from_twitch for {streamer} with response: {get_stream_json_from_twitch_request}",False) 
     else:
             discord_remote_log("Goinglivebot","red",f"tried to get streamer information with function get_stream_json_from_twitch for {streamer} with response: {get_stream_json_from_twitch_request}",True)
-            gotify("Clipbot",f"tried to get streamer information with function get_stream_json_from_twitch for {streamer} with response: {get_stream_json_from_twitch_request}","5")
+            send_gotify_notification("Clipbot",f"tried to get streamer information with function get_stream_json_from_twitch for {streamer} with response: {get_stream_json_from_twitch_request}","5")
+
     get_stream_json_from_twitch_request_json = get_stream_json_from_twitch_request.json()
+
     try:
         is_live = get_stream_json_from_twitch_request_json["data"][0]["type"]
         stream_category = get_stream_json_from_twitch_request_json["data"][0]["game_name"]
@@ -216,28 +221,31 @@ def get_stream_json_from_twitch(streamer):
         is_live = ""
         stream_category = ""
         streamer_name = ""
+
     return(get_stream_json_from_twitch_request, get_stream_json_from_twitch_request_json, is_live, stream_category, streamer_name)
 
 # ===== other functions =====
 # simple discord webhook send for remote logging
-def discord_remote_log(title,color,description,ping): 
+def discord_remote_log(title: str ,color: str ,description: str ,ping: str): 
     if use_discord_logs.lower() == "true":
-        if color == "blue":
+        if color.lower() == "blue":
             color = 1523940
-        elif color == "yellow":
+        elif color.lower() == "yellow":
             color = 14081792
-        elif color == "red":
+        elif color.lower() == "red":
             color = 10159108
-        elif color == "green":
+        elif color.lower() == "green":
             color = 703235
-        elif color == "purple":
+        elif color.lower() == "purple":
             color = 10622948
-        elif color == "gray" or color == "grey":
+        elif color.lower() == "gray" or color.lower() == "grey":
             color = 1776669
+        
         if ping:
             ping_string = f"<@{ping_id}>"
         else:
             ping_string = ""
+        
         data_for_log_hook = {"content": ping_string, "embeds": [
                 {
                     "title": title,
@@ -245,43 +253,49 @@ def discord_remote_log(title,color,description,ping):
                     "description": description
                 }
             ]}
+        
         remote_log_send_request_to_discord = requests.post(discord_remote_log_url, json=data_for_log_hook, params={'wait': 'true'})
         if verbose >= 2:
             print(f"sending message to discord remote log webhook with title: {title} Color: {color} Description: {description} and ping: {ping_string} . Discord response is {str(remote_log_send_request_to_discord)}")
+        
         time.sleep(1)
 
 # gotify notification
-def gotify(title,message,priority):
+def send_gotify_notification(title: str ,message: str ,priority: str):
     if use_gotify.lower() == "true":
-        gotify_notification_request = requests.post(gotifyurl, data={"title": title, "message": message, "priority":priority})
+        requests.post(gotifyurl, data={"title": title, "message": message, "priority":priority})
+
         if verbose >= 2:
             print(f"sending notification to gotify with title: {title} message: {message} priority: {priority}")
+
         time.sleep(1)
 
 # saves streamid to file
-def save_message_id(name,message_id,user_login):
-    fileName = f"config/embeds/{name}.txt"
-    with open(fileName, 'w') as File:
-        File.write(message_id + '\n' + user_login)
+def save_message_id_to_file(name: str ,message_id: str ,user_login: str):
+    with open(f"config/embeds/{name}.txt", 'w') as file_to_save_message_id_to:
+        file_to_save_message_id_to.write(message_id + '\n' + user_login)
+
     if verbose >= 1:
         print(f"message id: {message_id} and {user_login} saved in file {name}.txt")
         discord_remote_log("Goinglivebot","blue",f"message id: {message_id} and {user_login} saved in file {name}.txt",False)
 
 # reads streamid from file
-def read_message_id(name):
-    fileName = f"config/embeds/{name}.txt"
-    with open(fileName, 'r') as File:
-        message_id = str(File.readline())
-        message_id = message_id.strip("\n")
-        name_in_file = str(File.readline())
+def read_message_id_from_file(name: str) -> tuple[str, str]:
+    with open(f"config/embeds/{name}.txt", 'r') as file_to_read_from:
+        discord_webhook_message_id = str(file_to_read_from.readline())
+        discord_webhook_message_id = message_id.strip("\n")
+        name_in_file = str(file_to_read_from.readline())
+
     if verbose >= 1:
-        print(f"message id : {message_id} and {name_in_file} read from {name}.txt")
-        discord_remote_log("Goinglivebot","blue",f"message id: {message_id} and {name_in_file} read from {name}.txt",False)
-    return(message_id,name_in_file)
+        print(f"message id : {discord_webhook_message_id} and {name_in_file} read from {name}.txt")
+        discord_remote_log("Goinglivebot","blue",f"message id: {discord_webhook_message_id} and {name_in_file} read from {name}.txt",False)
+
+    return(discord_webhook_message_id,name_in_file)
 
 # remove file
-def remove_message_id_file(name):
+def remove_message_id_file(name: str):
     os.remove(f"config/embeds/{name}.txt")
+
     if verbose >= 1:
         print(f"removed file containing message id for embed for {name}.txt")
         discord_remote_log("Goinglivebot","blue",f"removed file containing message id for embed for {name}.txt",False)
@@ -372,7 +386,7 @@ streamers,streamer_check = get_streamers_from_file()
 for streamer in streamers:
     if exists(f"config/embeds/{streamer}.txt"):
         streamer_name = "unkown"
-        message_id_from_file,name_from_file = read_message_id(streamer)
+        message_id_from_file,name_from_file = read_message_id_from_file(streamer)
         if keep_messages:
             webhook_offline(message_id_from_file,name_from_file)
         else:
@@ -405,18 +419,18 @@ while True:
                     if exists(f"config/embeds/{streamer}.txt"):
                         print(f"embed allready exsists for {streamer} with name {streamer_name}, updating it")
                         discord_remote_log("Goinglivebot","yellow",f"embed allready exsists for {streamer} with name {streamer_name}, updating it",False)
-                        message_id_from_file,name_from_file = read_message_id(streamer)
+                        message_id_from_file,name_from_file = read_message_id_from_file(streamer)
                         discord_webhook_edit(r,message_id_from_file)
                     else:
                         print(f"no embed exsists for {streamer} with name {streamer_name}, creating it")
                         discord_remote_log("Goinglivebot","yellow",f"no embed exsists for {streamer} with name {streamer_name}, creating it",False)
                         message_id = discord_webhook_send(r)
-                        save_message_id(streamer,message_id,streamer_name)
+                        save_message_id_to_file(streamer,message_id,streamer_name)
                 else:
                     if exists(f"config/embeds/{streamer}.txt"):
                         print(f"{streamer} with name {streamer_name} is no longer live")
                         discord_remote_log("Goinglivebot","yellow",f"{streamer} with name {streamer_name} is no longer live",False)
-                        message_id_from_file,name_from_file = read_message_id(streamer)
+                        message_id_from_file,name_from_file = read_message_id_from_file(streamer)
                         if keep_messages:
                             webhook_offline(message_id_from_file,name_from_file)
                         else:
@@ -428,7 +442,7 @@ while True:
     except Exception as e:
         print(f"An exception occurred for streamer {streamer} with name {streamer_name} : {str(e)}")
         discord_remote_log("Goinglivebot","red",f"An exception occurred for streamer {streamer} with name {streamer_name} : {str(e)}",True)
-        gotify("Clipbot",f"An exception occurred for streamer {streamer} with name {streamer_name} : {str(e)}","5")
+        send_gotify_notification("Clipbot",f"An exception occurred for streamer {streamer} with name {streamer_name} : {str(e)}","5")
     print(f"finished main loop, waiting for {poll_interval} minutes")
     discord_remote_log("Goinglivebot","gray",f"finished main loop, waiting for {poll_interval} minutes",False)
     time.sleep(poll_interval*60)
