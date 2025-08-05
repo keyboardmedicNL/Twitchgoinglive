@@ -5,6 +5,7 @@ discord_webhook_url: # webhook url from discord to post going live messages to
 poll_interval: # time in minutes on how often the script should check if anyone is live
 
 # everything below this is optional, uncomment the line (remove the #) if you want to use it
+
 #web_server_port: # port used for approachable web server for uptime monitoring
 #use_web_server: # true or false, wether or not to use the approachable web server for uptime monitoring
 #use_discord_logs: # true or false, wether or not to use discord remote log messages
