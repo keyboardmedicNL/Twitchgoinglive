@@ -1,3 +1,3 @@
 @echo off
-python getuserid.py
+python src\getuserid.py
 pause

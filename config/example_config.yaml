@@ -1,0 +1,19 @@
+# REQUIRED PARAMETERS
+twitch_api_id: # your twitch api id
+twitch_api_secret: # your twitch api secret
+discord_webhook_url: # webhook url from discord to post going live messages to
+poll_interval: # time in minutes on how often the script should check if anyone is live
+
+# everything below this is optional, uncomment the line (remove the #) if you want to use it
+#web_server_port: # port used for approachable web server for uptime monitoring
+#use_web_server: # true or false, wether or not to use the approachable web server for uptime monitoring
+#use_discord_logs: # true or false, wether or not to use discord remote log messages
+#use_gotify: # true or false, wether or not to send error messages to gotify
+#gotify_url: # your gotify url
+#ping_id: # user id to ping when an error occurs in discord remote log messages
+#verbose: # 0, 1 or 2 level of logging done by the script
+#allowed_categories: # a list of allowed categories your streamers need to be in for the bot to show a going live message
+#message_before_embed: # a custom message to show above the going live embed message, can be used to ping roles or users
+#use_offline_messages: # wether or not the bot should delete the message when someone goes offline or should display an offline message instead
+#discord_remote_log_url: # webhook url for remote log messages on discord
+#web_server_url: # url to use for approachable web server for uptime monitoring

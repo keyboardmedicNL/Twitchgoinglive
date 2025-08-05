@@ -1,3 +1,3 @@
 @echo off
-python goinglive.py
+python src\goinglive.py
 pause
