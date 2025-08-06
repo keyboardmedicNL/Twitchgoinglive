@@ -5,6 +5,7 @@ import os
 import random
 import shutil
 import yaml
+from http.server import BaseHTTPRequestHandler, HTTPServer
 
 # vars
 
@@ -459,9 +460,38 @@ if streamer_get_was_succesfull:
             discord_remote_log("Goinglivebot","red",f"An exception occurred for streamer {streamer} with name {streamer_name} : {str(e)}",True)
             send_gotify_notification("Clipbot",f"An exception occurred for streamer {streamer} with name {streamer_name} : {str(e)}","5")
         
-        print(f"finished main loop, waiting for {loaded_config["poll_interval"]} minutes")
-        discord_remote_log("Goinglivebot","gray",f"finished main loop, waiting for {loaded_config["poll_interval"]} minutes",False)
-        time.sleep(loaded_config["poll_interval"]*60)
+        # start webserver
+        if loaded_config["use_web_server"]:
+            try:
+                print("starting webserver for 10 seconds")
+                class MyServer(BaseHTTPRequestHandler):
+                    def do_GET(self):
+                        self.send_response(200)
+                        self.send_header("Content-type", "text/html")
+                        self.end_headers()
+                        self.wfile.write(bytes("<html><head><title>https://pythonbasics.org</title></head>", "utf-8"))
+                        self.wfile.write(bytes("<p>Request: %s</p>" % self.path, "utf-8"))
+                        self.wfile.write(bytes("<body>", "utf-8"))
+                        self.wfile.write(bytes("<p>Hello, i am a webserver.</p>", "utf-8"))
+                        self.wfile.write(bytes("</body></html>", "utf-8"))
+
+                if __name__ == "__main__":        
+                    webServer = HTTPServer((loaded_config["web_server_url"], loaded_config["web_server_port"]), MyServer)
+                    print("Server started http://%s:%s" % (loaded_config["web_server_url"], loaded_config["web_server_port"]))
+                    #discord_remote_log("Goinglivebot/webserver","purple","Server started http://%s:%s" % (loaded_config["web_server_url"], loaded_config["web_server_port"]))
+                    webServer.serve_forever()
+                    print(f"finished main loop and running webserver, waiting for {loaded_config["poll_interval"]} minutes")
+                    discord_remote_log("Goinglivebot","gray",f"finished main loop and running webserver, waiting for {loaded_config["poll_interval"]} minutes",False)
+                    time.sleep(loaded_config["poll_interval"]*60)
+                    webServer.shutdown()
+            except Exception as e:
+                    print(f"An exception occurred in main loop: {str(e)}")
+                    #discord_remote_log("Goinglivebot/webserver","red",f"An exception occurred in main loop: {str(e)}")
+
+        else:
+            print(f"finished main loop, waiting for {loaded_config["poll_interval"]} minutes")
+            discord_remote_log("Goinglivebot","gray",f"finished main loop, waiting for {loaded_config["poll_interval"]} minutes",False)
+            time.sleep(loaded_config["poll_interval"]*60)
 else:
     print(f"unable to get streamers from file, stopping script....")
 
