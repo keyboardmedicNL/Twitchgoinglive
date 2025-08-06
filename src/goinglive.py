@@ -2,194 +2,22 @@ import time
 import requests
 from os.path import exists
 import os
-import random
 import shutil
-import yaml
-from http.server import BaseHTTPRequestHandler, HTTPServer
+import config_loader
+import discord_remote_logger
+import gotify_error_notifications
+import discord_webhook_embeds
 
 # vars
+config = config_loader.load_config
 
-default_config = {
-    "twitch_api_id":"",
-    "twitch_api_secret":"",
-    "discord_webhook_url":"",
-    "discord_remote_log_url":"",
-    "poll_interval":10,
-    "use_discord_logs":False,
-    "use_gotify":False,
-    "gotify_url":"",
-    "ping_id":"",
-    "verbose":0,
-    "allowed_categories":(),
-    "message_before_embed":"",
-    "use_offline_messages":False
-}
+discord_remote_log = discord_remote_logger.discord_remote_log
+send_gotify_notification = gotify_error_notifications.send_gotify_notification
 
-# ===== webhook functions =====
-# webhook send to discord for goinglive message
-def discord_webhook_send(streamer_data: dict ) -> str: 
-    username = streamer_data["data"][0]["user_name"]
-    user = streamer_data["data"][0]["user_login"]
-    title = streamer_data["data"][0]["title"]
-    game = streamer_data["data"][0]["game_name"]
-    viewers = streamer_data["data"][0]["viewer_count"]
-    started = streamer_data["data"][0]["started_at"]
-    thumbnail = streamer_data["data"][0]["thumbnail_url"]
-
-    if streamer_data["data"][0]["game_name"] == "":
-        game = "none"
-    
-    data_to_send_to_webhook = {"content": loaded_config["message_before_embed"],"embeds": [
-            {
-            "title": f":red_circle: {username} is now live!",
-            "description": title,
-            "url": f"https://www.twitch.tv/{user}",
-            "color": 6570404,
-            "fields": [
-                {
-                    "name": "Playing:",
-                    "value": game,
-                    "inline": "true"
-                },
-                {
-                    "name": "Viewers:",
-                    "value": viewers,
-                    "inline": "true"
-                },
-                {
-                    "name": "Twitch:",
-                    "value": f"[Watch stream](https://www.twitch.tv/{user})"
-                },
-                {
-                "name": "",
-                "value": "[***get this bot***](https://github.com/keyboardmedicNL/Twitchgoinglive)"
-                }
-            ],
-            "timestamp": started,
-            "image": {
-                "url": f"https://static-cdn.jtvnw.net/previews-ttv/live_user_{user}-640x360.jpg?cacheBypass={str(random.random())}"
-            },
-            "thumbnail": {
-                "url": thumbnail
-            },    
-            }
-        ]}
-    
-    send_request_to_discord = requests.post(loaded_config["discord_webhook_url"], json=data_to_send_to_webhook, params={'wait': 'true'})
-    send_request_to_discord_json = send_request_to_discord.json()
-    message_id = send_request_to_discord_json["id"]
-
-    if send_request_to_discord.ok:
-        if loaded_config["verbose"] >= 1:
-            print(f"posting message to discord with id: {message_id} for {streamer} with name {streamer_name}, response is {send_request_to_discord}")
-            discord_remote_log("Goinglivebot","green",f"posting message to discord with discord id: {message_id} for {streamer} with name {streamer_name}, response is {send_request_to_discord}",False)
-    else:
-        print(f"attempted to post message to discord with id: {message_id} for {streamer} with name {streamer_name}, response is {send_request_to_discord}")
-        discord_remote_log("Goinglivebot","red",f"attempted to post message to discord with discord id: {message_id} for {streamer} with name {streamer_name}, response is {send_request_to_discord}",True)
-        send_gotify_notification("Clipbot",f"attempted to post message to discord with discord id: {message_id} for {streamer} with name {streamer_name}, response is {send_request_to_discord}","5")
-        
-    return(message_id)
-    
-# edits discord webhook message
-def discord_webhook_edit(streamer_data: dict,message_id: str): 
-    username = streamer_data["data"][0]["user_name"]
-    user = streamer_data["data"][0]["user_login"]
-    title = streamer_data["data"][0]["title"]
-    game = streamer_data["data"][0]["game_name"]
-    viewers = streamer_data["data"][0]["viewer_count"]
-    started = streamer_data["data"][0]["started_at"]
-    thumbnail = streamer_data["data"][0]["thumbnail_url"]
-
-    if streamer_data["data"][0]["game_name"] == "":
-        game = "none"
-    
-    data_to_send_to_webhook = {"content": loaded_config["message_before_embed"], "embeds": [
-            {
-            "title": f":red_circle: {username} is now live!",
-            "description": title,
-            "url": f"https://www.twitch.tv/{user}",
-            "color": 6570404,
-            "fields": [
-                {
-                    "name": "Playing:",
-                    "value": game,
-                    "inline": "true"
-                },
-                {
-                    "name": "Viewers:",
-                    "value": viewers,
-                    "inline": "true"
-                },
-                {
-                    "name": "Twitch:",
-                    "value": f"[Watch stream](https://www.twitch.tv/{user})"
-                },
-                {
-                "name": "",
-                "value": "[***get this bot***](https://github.com/keyboardmedicNL/Twitchgoinglive)"
-                }
-            ],
-            "timestamp": started,
-            "image": {
-                "url": f"https://static-cdn.jtvnw.net/previews-ttv/live_user_{user}-640x360.jpg?cacheBypass={str(random.random())}"
-            },
-            "thumbnail": {
-                "url": thumbnail
-            },    
-            }
-        ]}
-    
-    edit_request_to_discord = requests.patch(f"{loaded_config["discord_webhook_url"]}/messages/{message_id}", json=data_to_send_to_webhook, params={'wait': 'true'})
-    
-    if edit_request_to_discord.ok:
-        if loaded_config["verbose"] >= 1:
-            print(f"updating message to discord with id: {message_id} for {streamer} with name {streamer_name}, response is {edit_request_to_discord}")
-            discord_remote_log("Goinglivebot","green",f"updating message to discord with discord id: {message_id} for {streamer} with name {streamer_name}, response is {edit_request_to_discord}",False)
-    else:
-        print(f"attempted to update message to discord with id: {message_id} for {streamer} with name {streamer_name}, response is {edit_request_to_discord}")
-        discord_remote_log("Goinglivebot","red",f"attempted to update message to discord with discord id: {message_id} for {streamer} with name {streamer_name}, response is {edit_request_to_discord}",True)
-        send_gotify_notification("Clipbot",f"attempted to update message to discord with discord id: {message_id} for {streamer} with name {streamer_name}, response is {edit_request_to_discord}","5")
-
-# deletes discord webhook message
-def discord_webhook_delete(message_id: str):
-    delete_request_to_discord = requests.delete(f"{loaded_config["discord_webhook_url"]}/messages/{message_id}", params={'wait': 'true'})
-    if delete_request_to_discord.ok:
-        if loaded_config["verbose"] >= 1:
-            print(f"deleting message om discord with id: {message_id}, response is {delete_request_to_discord}")
-            discord_remote_log("Goinglivebot","green",f"deleting message om discord with id: {message_id}, response is {delete_request_to_discord}",False)
-    else:
-        print(f"attempted to delete message on discord with id: {message_id}, response is {delete_request_to_discord}")
-        discord_remote_log("Goinglivebot","red",f"attempted to delete message on discord with id: {message_id}, response is {delete_request_to_discord}",True)
-        send_gotify_notification("Clipbot",f"attempted to delete message on discord with id: {message_id}, response is {delete_request_to_discord}","5")
-
-# edits currently live embed to offline message
-def discord_webhook_edit_to_offline(message_id: str ,filename: str):
-    data_to_send_to_webhook = {"content": loaded_config["message_before_embed"], "embeds": [
-            {
-            "title": f":x: {filename} has gone offline!",
-            "description": "",
-            "url": f"https://www.twitch.tv/{filename.lower()}",
-            "color": 6570404,
-            "fields": [
-                {
-                "name": "",
-                "value": "[***get this bot***](https://github.com/keyboardmedicNL/Twitchgoinglive)"
-                }
-            ],
-            }
-        ]}
-    
-    edit_to_offline_request_to_discord = requests.patch(f"{loaded_config["discord_webhook_url"]}/messages/{message_id}", json=data_to_send_to_webhook, params={'wait': 'true'})
-
-    if edit_to_offline_request_to_discord.ok:
-        if loaded_config["verbose"] >= 1:
-            print(f"updating to offline message to discord with id: {message_id} for {filename}, response is {edit_to_offline_request_to_discord}")
-            discord_remote_log("Goinglivebot","green",f"updating to offline message to discord with discord id: {message_id} for {filename}, response is {edit_to_offline_request_to_discord}",False)
-    else:
-        print(f"attempted to update offline message to discord with id: {message_id} for {filename}, response is {edit_to_offline_request_to_discord}")
-        discord_remote_log("Goinglivebot","red",f"attempted to update offlinee message to discord with discord id: {message_id} for {filename}, response is {edit_to_offline_request_to_discord}",True)
-        send_gotify_notification("Clipbot",f"attempted to update offline message to discord with discord id: {message_id} for {filename}, response is {edit_to_offline_request_to_discord}","5")
-
+discord_webhook_send = discord_webhook_embeds.discord_webhook_send
+discord_webhook_edit = discord_webhook_embeds.discord_webhook_edit
+discord_webhook_delete = discord_webhook_embeds.discord_webhook_delete
+discord_webhook_edit_to_offline = discord_webhook_embeds.discord_webhook_edit_to_offline
 
 # ===== twitch functions =====
 # renews token used for twitch api calls
@@ -246,50 +74,6 @@ def get_stream_json_from_twitch(streamer: str) -> tuple[dict, dict, bool, str, s
     return(get_stream_json_from_twitch_request, get_stream_json_from_twitch_request_json, is_live, stream_category, streamer_name)
 
 # ===== other functions =====
-# simple discord webhook send for remote logging
-def discord_remote_log(title: str ,color: str ,description: str ,ping: bool): 
-    if loaded_config["use_discord_logs"]:
-        if color.lower() == "blue":
-            color = 1523940
-        elif color.lower() == "yellow":
-            color = 14081792
-        elif color.lower() == "red":
-            color = 10159108
-        elif color.lower() == "green":
-            color = 703235
-        elif color.lower() == "purple":
-            color = 10622948
-        elif color.lower() == "gray" or color.lower() == "grey":
-            color = 1776669
-        
-        if ping:
-            ping_string = f"<@{loaded_config["ping_id"]}>"
-        else:
-            ping_string = ""
-        
-        data_for_log_hook = {"content": ping_string, "embeds": [
-                {
-                    "title": title,
-                    "color": color,
-                    "description": description
-                }
-            ]}
-        
-        remote_log_send_request_to_discord = requests.post(loaded_config["discord_remote_log_url"], json=data_for_log_hook, params={'wait': 'true'})
-        if loaded_config["verbose"] >= 2:
-            print(f"sending message to discord remote log webhook with title: {title} Color: {color} Description: {description} and ping: {ping_string} . Discord response is {str(remote_log_send_request_to_discord)}")
-        
-        time.sleep(1)
-
-# gotify notification
-def send_gotify_notification(title: str ,message: str ,priority: str):
-    if loaded_config["use_gotify"]:
-        requests.post(loaded_config["gotify_url"], data={"title": title, "message": message, "priority":priority})
-
-        if loaded_config["verbose"] >= 2:
-            print(f"sending notification to gotify with title: {title} message: {message} priority: {priority}")
-
-        time.sleep(1)
 
 # saves streamid to file
 def save_message_id_to_file(name: str ,message_id: str ,user_login: str):
@@ -298,7 +82,7 @@ def save_message_id_to_file(name: str ,message_id: str ,user_login: str):
 
     if loaded_config["verbose"] >= 1:
         print(f"message id: {message_id} and {user_login} saved in file {name}.txt")
-        discord_remote_log("Goinglivebot","blue",f"message id: {message_id} and {user_login} saved in file {name}.txt",False)
+        discord_remote_logger("Goinglivebot","blue",f"message id: {message_id} and {user_login} saved in file {name}.txt",False)
 
 # reads streamid from file
 def read_message_id_from_file(name: str) -> tuple[str, str]:
@@ -309,7 +93,7 @@ def read_message_id_from_file(name: str) -> tuple[str, str]:
 
     if loaded_config["verbose"] >= 1:
         print(f"message id : {discord_webhook_message_id} and {name_in_file} read from {name}.txt")
-        discord_remote_log("Goinglivebot","blue",f"message id: {discord_webhook_message_id} and {name_in_file} read from {name}.txt",False)
+        discord_remote_logger("Goinglivebot","blue",f"message id: {discord_webhook_message_id} and {name_in_file} read from {name}.txt",False)
 
     return(discord_webhook_message_id,name_in_file)
 
@@ -319,7 +103,7 @@ def remove_message_id_file(name: str):
 
     if loaded_config["verbose"] >= 1:
         print(f"removed file containing message id for embed for {name}.txt")
-        discord_remote_log("Goinglivebot","blue",f"removed file containing message id for embed for {name}.txt",False)
+        discord_remote_logger("Goinglivebot","blue",f"removed file containing message id for embed for {name}.txt",False)
 
 # gets list of streamers to poll
 def get_streamers_from_file() -> tuple[list, bool]:
@@ -330,7 +114,7 @@ def get_streamers_from_file() -> tuple[list, bool]:
 
             if not get_streamers_trough_request_response.ok:
                 print(f"was unable to get list of streamers trough request with response: {get_streamers_trough_request_response}")
-                discord_remote_log("Goinglivebot","red",f"was unable to get list of streamers trough request with response: {get_streamers_trough_request_response}",False)
+                discord_remote_logger("Goinglivebot","red",f"was unable to get list of streamers trough request with response: {get_streamers_trough_request_response}",False)
                 is_get_streamers_from_file_succesfull = get_streamers_trough_request_response.ok
             else:
                 list_of_streamers = get_streamers_trough_request_response.text.splitlines()
@@ -342,16 +126,6 @@ def get_streamers_from_file() -> tuple[list, bool]:
     discord_remote_log("Goinglivebot","yellow",f"list of streamers to poll from: {list_of_streamers}",False)
 
     return(list_of_streamers, is_get_streamers_from_file_succesfull)
-
-# loads config from file
-def load_config(default_config: dict) -> dict:
-    with open("config/config.yaml") as config_file:
-        config_yaml = yaml.safe_load(config_file)
-        merged_config = {**default_config, **config_yaml}
-
-    print("succesfully loaded config")
-
-    return(merged_config)
 
 #opens file to get auth token
 def read_twitch_api_token_from_file() -> str:
@@ -399,7 +173,7 @@ def clean_up_old_embeds(list_of_streamers: list ,use_offline_message: bool):
 
 
 # ===== main code =====
-loaded_config = load_config(default_config)
+loaded_config = config()
 create_embeds_folder()
 # gets list of streamers once to clean up old embeds, ends script if it fails to get list of streamers
 token_from_twitch = read_twitch_api_token_from_file()
