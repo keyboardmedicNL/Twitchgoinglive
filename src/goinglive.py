@@ -164,10 +164,10 @@ if streamer_get_was_succesfull:
                     # sets streamer name incase an exception is called before streamer_name is set with a function
                     streamer_name = "unknown"
 
-                    get_stream_json_from_twitch_response,get_stream_json_from_twitch_data,is_live,stream_category,streamer_name = get_stream_json_from_twitch(streamer)
+                    get_stream_json_from_twitch_response,get_stream_json_from_twitch_data,is_live,stream_category,streamer_name = get_stream_json_from_twitch(streamer,token_from_twitch)
                     if not get_stream_json_from_twitch_response.ok:
                         token_from_twitch = get_token_from_twitch_api()
-                        get_stream_json_from_twitch_response,get_stream_json_from_twitch_data,is_live,stream_category,streamer_name = get_stream_json_from_twitch(streamer)
+                        get_stream_json_from_twitch_response,get_stream_json_from_twitch_data,is_live,stream_category,streamer_name = get_stream_json_from_twitch(streamer,token_from_twitch)
                     
                     if is_live and (stream_category.lower() in loaded_config["allowed_categories"] or len(loaded_config["allowed_categories"])==0):
                         
