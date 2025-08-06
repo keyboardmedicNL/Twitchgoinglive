@@ -7,6 +7,7 @@ import config_loader
 import discord_remote_logger
 import gotify_error_notifications
 import discord_webhook_embeds
+import embed_file_handler
 
 # vars
 config = config_loader.load_config
@@ -18,6 +19,10 @@ discord_webhook_send = discord_webhook_embeds.discord_webhook_send
 discord_webhook_edit = discord_webhook_embeds.discord_webhook_edit
 discord_webhook_delete = discord_webhook_embeds.discord_webhook_delete
 discord_webhook_edit_to_offline = discord_webhook_embeds.discord_webhook_edit_to_offline
+
+save_message_id_to_file = embed_file_handler.save_message_id_to_file
+read_message_id_from_file = embed_file_handler.read_message_id_from_file
+remove_message_id_file = embed_file_handler.remove_message_id_file
 
 # ===== twitch functions =====
 # renews token used for twitch api calls
@@ -72,38 +77,6 @@ def get_stream_json_from_twitch(streamer: str) -> tuple[dict, dict, bool, str, s
         streamer_name = ""
 
     return(get_stream_json_from_twitch_request, get_stream_json_from_twitch_request_json, is_live, stream_category, streamer_name)
-
-# ===== other functions =====
-
-# saves streamid to file
-def save_message_id_to_file(name: str ,message_id: str ,user_login: str):
-    with open(f"config/embeds/{name}.txt", 'w') as file_to_save_message_id_to:
-        file_to_save_message_id_to.write(message_id + '\n' + user_login)
-
-    if loaded_config["verbose"] >= 1:
-        print(f"message id: {message_id} and {user_login} saved in file {name}.txt")
-        discord_remote_logger("Goinglivebot","blue",f"message id: {message_id} and {user_login} saved in file {name}.txt",False)
-
-# reads streamid from file
-def read_message_id_from_file(name: str) -> tuple[str, str]:
-    with open(f"config/embeds/{name}.txt", 'r') as file_to_read_from:
-        discord_webhook_message_id = str(file_to_read_from.readline())
-        discord_webhook_message_id = discord_webhook_message_id.strip("\n")
-        name_in_file = str(file_to_read_from.readline())
-
-    if loaded_config["verbose"] >= 1:
-        print(f"message id : {discord_webhook_message_id} and {name_in_file} read from {name}.txt")
-        discord_remote_logger("Goinglivebot","blue",f"message id: {discord_webhook_message_id} and {name_in_file} read from {name}.txt",False)
-
-    return(discord_webhook_message_id,name_in_file)
-
-# remove file
-def remove_message_id_file(name: str):
-    os.remove(f"config/embeds/{name}.txt")
-
-    if loaded_config["verbose"] >= 1:
-        print(f"removed file containing message id for embed for {name}.txt")
-        discord_remote_logger("Goinglivebot","blue",f"removed file containing message id for embed for {name}.txt",False)
 
 # gets list of streamers to poll
 def get_streamers_from_file() -> tuple[list, bool]:
@@ -236,6 +209,3 @@ if streamer_get_was_succesfull:
         time.sleep(loaded_config["poll_interval"]*60)
 else:
     print(f"unable to get streamers from file, stopping script....")
-
-
-
