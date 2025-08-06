@@ -2,7 +2,6 @@
 - cli dialog to make config on first time
 - docker commmand to run getuserid.py
 - add config acces to getuserid.py
-- add webserver to goinglive.py
 - update readme
 - added group parameter to streamers.txt
 - move embeds to one file potentially?

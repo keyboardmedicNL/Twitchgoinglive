@@ -6,8 +6,6 @@ poll_interval: # time in minutes on how often the script should check if anyone 
 
 # everything below this is optional, uncomment the line (remove the #) if you want to use it
 
-#web_server_port: # port used for approachable web server for uptime monitoring
-#use_web_server: # true or false, wether or not to use the approachable web server for uptime monitoring
 #use_discord_logs: # true or false, wether or not to use discord remote log messages
 #use_gotify: # true or false, wether or not to send error messages to gotify
 #gotify_url: # your gotify url
@@ -17,4 +15,3 @@ poll_interval: # time in minutes on how often the script should check if anyone 
 #message_before_embed: # a custom message to show above the going live embed message, can be used to ping roles or users
 #use_offline_messages: # wether or not the bot should delete the message when someone goes offline or should display an offline message instead
 #discord_remote_log_url: # webhook url for remote log messages on discord
-#web_server_url: # url to use for approachable web server for uptime monitoring
