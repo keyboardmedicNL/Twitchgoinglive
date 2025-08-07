@@ -68,12 +68,17 @@ def discord_webhook_send(streamer_data: dict ) -> str:
 
             if send_request_to_discord.ok:
                 logging.debug("posting message to discord with id: %s for user %s, response is %s",message_id, username, send_request_to_discord)
+                break
+            else:
+                error_count = error_count+1
+                logging.error("tried posting message to discord with id: %s for user %s, response is %s",message_id, username, send_request_to_discord)
+    
         except Exception as e:
                 error_count = error_count+1
                 logging.error("attempted to post message to discord with id: %s for user %s, response is %s with exception: %s",message_id, username, send_request_to_discord, e)
                 discord_remote_log("Goinglivebot","red",f"attempted to post message to discord with discord id: {message_id} for user {username}, response is {send_request_to_discord} with exception {e}",True)
                 send_gotify_notification("Clipbot",f"attempted to post message to discord with discord id: {message_id} for user {username}, response is {send_request_to_discord} with exception {e}","5")
-    if error_count == 3:
+    if error_count == 4:
         raise RuntimeError("tried to create new webhook message on discord 3 times and failed")       
     return(message_id)
     
@@ -133,6 +138,10 @@ def discord_webhook_edit(streamer_data: dict,message_id: str):
             
             if edit_request_to_discord.ok:
                 logging.debug("updating message to discord with id: %s for user %s, response is %s",message_id, username, edit_request_to_discord)
+                break
+            else:
+                error_count = error_count+1
+                logging.error("tried updating message to discord with id: %s for user %s, response is %s",message_id, username, edit_request_to_discord)
         except Exception as e:
             error_count = error_count+1
             logging.error("attempted to update message to discord with id: %s for user %s, response is %s with exception: %e",message_id, username, edit_request_to_discord, e)
@@ -149,6 +158,10 @@ def discord_webhook_delete(message_id: str):
             delete_request_to_discord = requests.delete(f"{loaded_config.discord_webhook_url}/messages/{message_id}", params={'wait': 'true'})
             if delete_request_to_discord.ok:
                 logging.debug("deleting message om discord with id: %s, response is %s",message_id, delete_request_to_discord)
+                break
+            else:
+                error_count = error_count+1
+                logging.error("tried deleting message om discord with id: %s, response is %s",message_id, delete_request_to_discord)
         except Exception as e:
                 error_count = error_count+1
                 logging.error("attempted to delete message on discord with id: %s, response is %s with exception: %s",message_id, delete_request_to_discord, e)
@@ -181,6 +194,10 @@ def discord_webhook_edit_to_offline(message_id: str ,filename: str):
 
             if edit_to_offline_request_to_discord.ok:
                 logging.debug("updating to offline message to discord with id: %s for %s, response is %s",message_id, filename, edit_to_offline_request_to_discord)
+                break
+            else:
+                error_count = error_count+1
+                logging.error("tried updating to offline message to discord with id: %s for %s, response is %s",message_id, filename, edit_to_offline_request_to_discord)    
         except Exception as e:
             error_count = error_count+1
             logging.error("attempted to update offline message to discord with id: %s for %s, response is %s with exception %e",message_id, filename, edit_to_offline_request_to_discord, e)

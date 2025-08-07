@@ -27,13 +27,14 @@ def get_token_from_twitch_api() -> str:
                 logging.debug("new twitch api auth token recieved")
                 with open(r'config/token.txt', 'w') as token_file:
                     token_file.write("%s\n" % token_from_twitch)
+
                 break
+
             else:
-                error_count = error_count+1
                 logging.error("unable to request new twitch api auth token with response: %s",get_token_from_twitch_request)
                 discord_remote_log("Goinglivebot","red",f"unable to request new twitch api auth token with response: {get_token_from_twitch_request}",True)
                 send_gotify_notification("Clipbot",f"unable to request new twitch api auth token with response: {get_token_from_twitch_request}","5")
-                token_from_twitch = "empty"
+                error_count = error_count+1
         if error_count == 4:
             raise RuntimeError("Unable to request a new twitch api token after trying 3 times.")
         return(token_from_twitch)
@@ -46,19 +47,32 @@ def get_stream_json_from_twitch(streamer: str, token_from_twitch: str) -> tuple[
             get_stream_json_from_twitch_request=requests.get(f"https://api.twitch.tv/helix/streams?&user_id={streamer}", headers={'Authorization':f"Bearer {token_from_twitch}", 'Client-Id':loaded_config.twitch_api_id})
             logging.debug("tried to get streamer information for %s with response: %s",streamer, get_stream_json_from_twitch_request)
 
-            get_stream_json_from_twitch_request_json = get_stream_json_from_twitch_request.json()
+            if get_stream_json_from_twitch_request.ok:
+                get_stream_json_from_twitch_request_json = get_stream_json_from_twitch_request.json()
 
-            stream_category = get_stream_json_from_twitch_request_json["data"][0]["game_name"]
-            streamer_name = get_stream_json_from_twitch_request_json["data"][0]["user_name"]
-            if str(get_stream_json_from_twitch_request_json["data"][0]["type"]).lower() == "live":
-                is_live = True
-                logging.info("%s with name %s is live and in category %s",streamer, streamer_name, stream_category)
-                discord_remote_log("Goinglivebot","green",f"{streamer} with name {streamer_name} is live and in category {stream_category}!",False)
+                try:               
+                    if str(get_stream_json_from_twitch_request_json["data"][0]["type"]).lower() == "live":
+                        is_live = True
+                        stream_category = get_stream_json_from_twitch_request_json["data"][0]["game_name"]
+                        streamer_name = get_stream_json_from_twitch_request_json["data"][0]["user_name"]
+                        logging.info("%s with name %s is live and in category %s",streamer, streamer_name, stream_category)
+                        discord_remote_log("Goinglivebot","green",f"{streamer} with name {streamer_name} is live and in category {stream_category}!",False)
+                    break
+                except:
+                    is_live = False
+                    stream_category = ""
+                    streamer_name = ""
+                    break
             else:
-                is_live = False
+                error_count = error_count+1
+                discord_remote_log("Goinglivebot","red",f"tried to get streamer information for {streamer} with response: {get_stream_json_from_twitch_request}",True)
+                send_gotify_notification("Clipbot",f"tried to get streamer information for {streamer} with response: {get_stream_json_from_twitch_request}","5")
+                logging.error("tried to get streamer information for %s with response: %s",streamer, get_stream_json_from_twitch_request)
+
         except Exception as e:
             discord_remote_log("Goinglivebot","red",f"tried to get streamer information for {streamer} with response: {get_stream_json_from_twitch_request} with exception {e}",True)
             send_gotify_notification("Clipbot",f"tried to get streamer information for {streamer} with response: {get_stream_json_from_twitch_request} with exception {e}","5")
+            logging.error("tried to get streamer information for %s with response: %s with exception: %s",streamer, get_stream_json_from_twitch_request, e)
             error_count = error_count +1
     if error_count == 4:
         raise RuntimeError("Unable to get streamer info from twitch after trying 3 times.")

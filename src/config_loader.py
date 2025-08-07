@@ -24,13 +24,11 @@ def load_config() -> tuple[dict, str]:
         merged_config = config_object({**default_config, **config_yaml})
     
     if merged_config.twitch_api_id == "" or merged_config.twitch_api_secret == "" or merged_config.discord_webhook_url == "":
-        logging.error("you are missing required values in your config. please fill them in and try again")
-        config_load_succes = False
+        raise RuntimeError("you are missing required values in your config. please fill them in and try again")
     else:
-        config_load_succes = True
         logging.info("succesfully loaded config")
     
-    return(merged_config,config_load_succes)
+    return(merged_config)
 
 class config_object:
     def __init__(self, d=None):
