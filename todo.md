@@ -4,5 +4,4 @@
 - add config acces to getuserid.py
 - update readme
 - added group parameter to streamers.txt
-- move embeds to one file potentially?
 - implement python virtual enviroment

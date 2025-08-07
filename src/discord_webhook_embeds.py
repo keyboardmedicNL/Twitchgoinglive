@@ -23,7 +23,7 @@ def discord_webhook_send(streamer_data: dict ) -> str:
     if streamer_data["data"][0]["game_name"] == "":
         game = "none"
     
-    data_to_send_to_webhook = {"content": loaded_config["message_before_embed"],"embeds": [
+    data_to_send_to_webhook = {"content": loaded_config.message_before_embed,"embeds": [
             {
             "title": f":red_circle: {username} is now live!",
             "description": title,
@@ -59,7 +59,7 @@ def discord_webhook_send(streamer_data: dict ) -> str:
             }
         ]}
     
-    send_request_to_discord = requests.post(loaded_config["discord_webhook_url"], json=data_to_send_to_webhook, params={'wait': 'true'})
+    send_request_to_discord = requests.post(loaded_config.discord_webhook_url, json=data_to_send_to_webhook, params={'wait': 'true'})
     send_request_to_discord_json = send_request_to_discord.json()
     message_id = send_request_to_discord_json["id"]
 
@@ -86,7 +86,7 @@ def discord_webhook_edit(streamer_data: dict,message_id: str):
     if streamer_data["data"][0]["game_name"] == "":
         game = "none"
     
-    data_to_send_to_webhook = {"content": loaded_config["message_before_embed"], "embeds": [
+    data_to_send_to_webhook = {"content": loaded_config.message_before_embed, "embeds": [
             {
             "title": f":red_circle: {username} is now live!",
             "description": title,
@@ -122,7 +122,7 @@ def discord_webhook_edit(streamer_data: dict,message_id: str):
             }
         ]}
     
-    edit_request_to_discord = requests.patch(f"{loaded_config["discord_webhook_url"]}/messages/{message_id}", json=data_to_send_to_webhook, params={'wait': 'true'})
+    edit_request_to_discord = requests.patch(f"{loaded_config.discord_webhook_url}/messages/{message_id}", json=data_to_send_to_webhook, params={'wait': 'true'})
     
     if edit_request_to_discord.ok:
         logging.debug("updating message to discord with id: %s for user %s, response is %s",message_id, username, edit_request_to_discord)
@@ -134,7 +134,7 @@ def discord_webhook_edit(streamer_data: dict,message_id: str):
 
 # deletes discord webhook message
 def discord_webhook_delete(message_id: str):
-    delete_request_to_discord = requests.delete(f"{loaded_config["discord_webhook_url"]}/messages/{message_id}", params={'wait': 'true'})
+    delete_request_to_discord = requests.delete(f"{loaded_config.discord_webhook_url}/messages/{message_id}", params={'wait': 'true'})
     if delete_request_to_discord.ok:
         logging.debug("deleting message om discord with id: %s, response is %s",message_id, delete_request_to_discord)
         discord_remote_log("Goinglivebot","green",f"deleting message om discord with id: {message_id}, response is {delete_request_to_discord}",False)
@@ -145,7 +145,7 @@ def discord_webhook_delete(message_id: str):
 
 # edits currently live embed to offline message
 def discord_webhook_edit_to_offline(message_id: str ,filename: str):
-    data_to_send_to_webhook = {"content": loaded_config["message_before_embed"], "embeds": [
+    data_to_send_to_webhook = {"content": loaded_config.message_before_embed, "embeds": [
             {
             "title": f":x: {filename} has gone offline!",
             "description": "",
@@ -160,7 +160,7 @@ def discord_webhook_edit_to_offline(message_id: str ,filename: str):
             }
         ]}
     
-    edit_to_offline_request_to_discord = requests.patch(f"{loaded_config["discord_webhook_url"]}/messages/{message_id}", json=data_to_send_to_webhook, params={'wait': 'true'})
+    edit_to_offline_request_to_discord = requests.patch(f"{loaded_config.discord_webhook_url}/messages/{message_id}", json=data_to_send_to_webhook, params={'wait': 'true'})
 
     if edit_to_offline_request_to_discord.ok:
         logging.debug("updating to offline message to discord with id: %s for %s, response is %s",message_id, filename, edit_to_offline_request_to_discord)

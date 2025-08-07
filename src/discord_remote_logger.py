@@ -8,7 +8,7 @@ loaded_config = config_loader.load_config()
 
 # simple discord webhook send for remote logging
 def discord_remote_log(title: str ,color: str ,description: str ,ping: bool): 
-    if loaded_config["use_discord_logs"]:
+    if loaded_config.use_discord_logs:
         if color.lower() == "blue":
             color = 1523940
         elif color.lower() == "yellow":
@@ -23,7 +23,7 @@ def discord_remote_log(title: str ,color: str ,description: str ,ping: bool):
             color = 1776669
         
         if ping:
-            ping_string = f"<@{loaded_config["ping_id"]}>"
+            ping_string = f"<@{loaded_config.ping_id}>"
         else:
             ping_string = ""
         
@@ -35,7 +35,7 @@ def discord_remote_log(title: str ,color: str ,description: str ,ping: bool):
                 }
             ]}
         
-        remote_log_send_request_to_discord = requests.post(loaded_config["discord_remote_log_url"], json=data_for_log_hook, params={'wait': 'true'})
+        remote_log_send_request_to_discord = requests.post(loaded_config.discord_remote_log_url, json=data_for_log_hook, params={'wait': 'true'})
         logging.debug('sending message to discord remote log webhook with title: %s color: %s description: %s and ping %s . Discord response is: %s',title, color, description, ping_string, str(remote_log_send_request_to_discord))
         
         time.sleep(1)
