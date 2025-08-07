@@ -144,8 +144,8 @@ def main():
                         discord_webhook_delete(message_id_from_file)
                     remove_message_id_file(streamer)
     
-    logger.info('finished main loop, waiting for %s minutes',loaded_config.poll_interval)
-    time.sleep(poll_interval_minutes)
+        logger.info('finished main loop, waiting for %s minutes',loaded_config.poll_interval)
+        time.sleep(poll_interval_minutes)
 
 if __name__ == "__main__":
     main()
