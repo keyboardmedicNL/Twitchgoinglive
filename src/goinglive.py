@@ -17,7 +17,6 @@ import sys
 
 # vars
 
-
 logger = logging.getLogger(__name__)
 
 config = config_loader.load_config

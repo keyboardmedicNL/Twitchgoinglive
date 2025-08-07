@@ -2,12 +2,8 @@ import config_loader
 import discord_remote_logger
 import os
 import logging
-#import housey_logging
 
 # vars
-#housey_logging.configure()
-#logger = logging.getLogger(__name__)
-
 loaded_config = config_loader.load_config()
 discord_remote_log = discord_remote_logger.discord_remote_log
 

@@ -1,9 +1,5 @@
 import yaml
 import logging
-#import housey_logging
-
-#housey_logging.configure()
-#logger = logging.getLogger(__name__)
 
 default_config = {
     "twitch_api_id":"",

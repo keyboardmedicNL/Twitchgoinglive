@@ -4,11 +4,8 @@ import requests
 import gotify_error_notifications
 from os.path import exists
 import logging
-#import housey_logging
 
 # vars
-#housey_logging.configure()
-#logger = logging.getLogger(__name__)
 
 loaded_config = config_loader.load_config()
 discord_remote_log = discord_remote_logger.discord_remote_log
