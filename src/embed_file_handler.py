@@ -4,7 +4,7 @@ import os
 import logging
 
 # vars
-loaded_config = config_loader.load_config()
+loaded_config, _ = config_loader.load_config()
 discord_remote_log = discord_remote_logger.discord_remote_log
 
 # saves streamid to file
@@ -13,7 +13,6 @@ def save_message_id_to_file(name: str ,message_id: str ,user_login: str):
         file_to_save_message_id_to.write(message_id + '\n' + user_login)
 
     logging.debug("message id: %s and %s saved in file %s.txt",message_id, user_login, name)
-    discord_remote_log("Goinglivebot","blue",f"message id: {message_id} and {user_login} saved in file {name}.txt",False)
 
 # reads streamid from file
 def read_message_id_from_file(name: str) -> tuple[str, str]:
@@ -23,7 +22,6 @@ def read_message_id_from_file(name: str) -> tuple[str, str]:
         name_in_file = str(file_to_read_from.readline())
 
     logging.debug("message id : %s and %s read from %s.txt",discord_webhook_message_id, name_in_file, name)
-    discord_remote_log("Goinglivebot","blue",f"message id: {discord_webhook_message_id} and {name_in_file} read from {name}.txt",False)
 
     return(discord_webhook_message_id,name_in_file)
 
@@ -32,4 +30,3 @@ def remove_message_id_file(name: str):
     os.remove(f"config/embeds/{name}.txt")
 
     logging.debug("removed file containing message id for embed for %s.txt",name)
-    discord_remote_log("Goinglivebot","blue",f"removed file containing message id for embed for {name}.txt",False)

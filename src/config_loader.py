@@ -18,14 +18,19 @@ default_config = {
 }
 
 # loads config from file
-def load_config() -> dict:
+def load_config() -> tuple[dict, str]:
     with open("config/config.yaml") as config_file:
         config_yaml = yaml.safe_load(config_file)
         merged_config = config_object({**default_config, **config_yaml})
-
-    logging.info("succesfully loaded config")
-
-    return(merged_config)
+    
+    if merged_config.twitch_api_id == "" or merged_config.twitch_api_secret == "" or merged_config.discord_webhook_url == "":
+        logging.error("you are missing required values in your config. please fill them in and try again")
+        config_load_succes = False
+    else:
+        config_load_succes = True
+        logging.info("succesfully loaded config")
+    
+    return(merged_config,config_load_succes)
 
 class config_object:
     def __init__(self, d=None):

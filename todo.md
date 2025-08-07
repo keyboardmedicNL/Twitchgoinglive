@@ -1,4 +1,5 @@
-- error if required parameters are missing
+- remove debug messages from discord remote logger
+- add proper error checking for requests
 - cli dialog to make config on first time
 - docker commmand to run getuserid.py
 - add config acces to getuserid.py

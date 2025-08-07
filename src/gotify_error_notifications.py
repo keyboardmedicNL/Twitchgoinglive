@@ -3,7 +3,7 @@ import time
 import requests
 import logging
 
-loaded_config = config_loader.load_config()
+loaded_config, _ = config_loader.load_config()
 
 def send_gotify_notification(title: str ,message: str ,priority: str):
     if loaded_config.use_gotify:
