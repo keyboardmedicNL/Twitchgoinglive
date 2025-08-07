@@ -26,7 +26,7 @@ def get_token_from_twitch_api() -> str:
         if get_token_from_twitch_request.ok:
             get_token_from_twitch_json = get_token_from_twitch_request.json()
             token_from_twitch = get_token_from_twitch_json["access_token"]
-            logging.debug("new twitch api auth token is: %s",token_from_twitch)
+            logging.debug("new twitch api auth token recieved")
             discord_remote_log("Goinglivebot","green",f"new twitch api auth token recieved",False)
             with open(r'config/token.txt', 'w') as token_file:
                 token_file.write("%s\n" % token_from_twitch)
@@ -73,7 +73,7 @@ def read_twitch_api_token_from_file() -> str:
         with open("config/token.txt", 'r') as file_with_twitch_token:
             token_raw = str(file_with_twitch_token.readline())
             twitch_api_token = token_raw.strip()
-        logging.debug("Token to use for twitch api auth: %s ",twitch_api_token)
+        logging.debug("Token to use for twitch api loaded")
         discord_remote_log("Goinglivebot","blue","twitch api auth token loaded succesfully",False)
     else:
         twitch_api_token = get_token_from_twitch_api()
