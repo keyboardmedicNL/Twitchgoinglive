@@ -1,7 +1,6 @@
 - add proper error checking for requests
 - cli dialog to make config on first time
 - docker commmand to run getuserid.py
-- add config acces to getuserid.py
 - update readme
 - added group parameter to streamers.txt
 - implement python virtual enviroment
