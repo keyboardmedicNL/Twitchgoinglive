@@ -1,30 +1,67 @@
 import requests
-from getpass import getpass
+import config_loader
+import twitch_api_handler
+import time
 
 #functions
-def get_token(): 
-        print("Requesting new twitch api auth token from twitch")
-        response=requests.post("https://id.twitch.tv/oauth2/token", json={"client_id" : str(twitch_api_id), "client_secret" : str(twitch_api_secret), "grant_type":"client_credentials"})
-        if "200" in str(response):
-            token_json = response.json()
-            token = token_json["access_token"]
-            print(f"new twitch api auth token succesfully requested")
-        else:
-            print(f"unable to request new twitch api auth token with response: {response}")
-            token = "empty"
-        return(token)
+def check_if_id_allready_in_streamers_file(user_id: str,) -> bool:
+    with open(f"config/streamers.txt", 'r') as streamers_file:
+        list_of_streamers = [line.rstrip() for line in streamers_file]
 
-#main script
-print ("Get twitch user id script:")
-print("please input your twitch api id")
-twitch_api_id= getpass("Twitch api id: ")
-print("please input your twitch api secret")
-twitch_api_secret = getpass("Twitch api secret: ")
-token = get_token()
-while True:
-    user_name = input("please input the user name you would like to get the id for or press ctrl+c to stop this script at any time: ")
-    response=requests.get(f"https://api.twitch.tv/helix/users?login={user_name.lower()}", headers={'Authorization':f"Bearer {token}", 'Client-Id':twitch_api_id})
-    print(f"response for get users from twitch is {response}")
-    responsejson = response.json()
-    user_id = responsejson["data"][0]["id"]
-    print(f"the user id for {user_name} = {user_id}")
+    for streamer in list_of_streamers:
+        if user_id == streamer.split()[0]:
+            allready_in_file = True
+            break
+        else:
+            allready_in_file = False
+
+    return(allready_in_file)
+
+def main():
+    loaded_config, config_load_succes = config_loader.load_config()
+
+    if config_load_succes:
+
+        print ("Get twitch user id script by keyboardmedic:")
+        time.sleep(1)
+        print("you can stop this script at any time by pressing ctrl+c")
+        print("------")
+        time.sleep(1)
+
+        token = twitch_api_handler.get_token_from_twitch_api()
+
+        while True:
+            save_choice = ""
+            print("please input the user name you would like to get the id for: ")
+            user_name = input()
+            response=requests.get(f"https://api.twitch.tv/helix/users?login={user_name.lower()}", headers={'Authorization':f"Bearer {token}", 'Client-Id':str(loaded_config.twitch_api_id)})
+            if response.ok:
+            
+                responsejson = response.json()
+                user_id = responsejson["data"][0]["id"]
+                print(f"the user id for {user_name} = {user_id}")
+
+                print("would you like to save the id to your streamers.txt? (Y) or n ")
+                save_choice = input() 
+
+                if save_choice.lower() == "y" or save_choice == "":
+                    print("wich group would you like to assign the user too? (Default) or <user input>")
+                    group = input()
+                    if group == "":
+                        group = "default"
+                    if not check_if_id_allready_in_streamers_file(user_id):
+                        with open(f"config/streamers.txt", 'a') as streamers_file:
+                            streamers_file.write(f"\n{user_id} {group}")
+                        print(f"added new line to streamers.txt: {user_id} {group}")
+                    else:
+                        print(f"{user_id} allready exsists in streamers.txt. skipping save...")
+                    print("------")
+                else:
+                    print("------")
+            else:
+                print(f"response for get users from twitch is {response}")
+    else:
+        print("missing required parameters in your config. please check your config and try again")
+
+if __name__ == "__main__":
+    main()
