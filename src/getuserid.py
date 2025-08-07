@@ -18,50 +18,46 @@ def check_if_id_allready_in_streamers_file(user_id: str,) -> bool:
     return(allready_in_file)
 
 def main():
-    loaded_config, config_load_succes = config_loader.load_config()
+    loaded_config = config_loader.load_config()
 
-    if config_load_succes:
+    print ("Get twitch user id script by keyboardmedic:")
+    time.sleep(1)
+    print("you can stop this script at any time by pressing ctrl+c")
+    print("------")
+    time.sleep(1)
 
-        print ("Get twitch user id script by keyboardmedic:")
-        time.sleep(1)
-        print("you can stop this script at any time by pressing ctrl+c")
-        print("------")
-        time.sleep(1)
+    token = twitch_api_handler.get_token_from_twitch_api()
 
-        token = twitch_api_handler.get_token_from_twitch_api()
+    while True:
+        save_choice = ""
+        print("please input the user name you would like to get the id for: ")
+        user_name = input()
+        response=requests.get(f"https://api.twitch.tv/helix/users?login={user_name.lower()}", headers={'Authorization':f"Bearer {token}", 'Client-Id':str(loaded_config.twitch_api_id)})
+        if response.ok:
+        
+            responsejson = response.json()
+            user_id = responsejson["data"][0]["id"]
+            print(f"the user id for {user_name} = {user_id}")
 
-        while True:
-            save_choice = ""
-            print("please input the user name you would like to get the id for: ")
-            user_name = input()
-            response=requests.get(f"https://api.twitch.tv/helix/users?login={user_name.lower()}", headers={'Authorization':f"Bearer {token}", 'Client-Id':str(loaded_config.twitch_api_id)})
-            if response.ok:
-            
-                responsejson = response.json()
-                user_id = responsejson["data"][0]["id"]
-                print(f"the user id for {user_name} = {user_id}")
+            print("would you like to save the id to your streamers.txt? (Y) or n ")
+            save_choice = input() 
 
-                print("would you like to save the id to your streamers.txt? (Y) or n ")
-                save_choice = input() 
-
-                if save_choice.lower() == "y" or save_choice == "":
-                    print("wich group would you like to assign the user too? (Default) or <user input>")
-                    group = input()
-                    if group == "":
-                        group = "default"
-                    if not check_if_id_allready_in_streamers_file(user_id):
-                        with open(f"config/streamers.txt", 'a') as streamers_file:
-                            streamers_file.write(f"\n{user_id} {group}")
-                        print(f"added new line to streamers.txt: {user_id} {group}")
-                    else:
-                        print(f"{user_id} allready exsists in streamers.txt. skipping save...")
-                    print("------")
+            if save_choice.lower() == "y" or save_choice == "":
+                print("wich group would you like to assign the user too? (Default) or <user input>")
+                group = input()
+                if group == "":
+                    group = "default"
+                if not check_if_id_allready_in_streamers_file(user_id):
+                    with open(f"config/streamers.txt", 'a') as streamers_file:
+                        streamers_file.write(f"\n{user_id} {group}")
+                    print(f"added new line to streamers.txt: {user_id} {group}")
                 else:
-                    print("------")
+                    print(f"{user_id} allready exsists in streamers.txt. skipping save...")
+                print("------")
             else:
-                print(f"response for get users from twitch is {response}")
-    else:
-        print("missing required parameters in your config. please check your config and try again")
+                print("------")
+        else:
+            print(f"response for get users from twitch is {response}")
 
 if __name__ == "__main__":
     main()

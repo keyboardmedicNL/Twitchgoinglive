@@ -4,7 +4,7 @@ import os
 import logging
 
 # vars
-loaded_config, _ = config_loader.load_config()
+loaded_config = config_loader.load_config()
 discord_remote_log = discord_remote_logger.discord_remote_log
 
 # saves streamid to file

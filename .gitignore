@@ -5,3 +5,4 @@ config/config.yaml
 src/__pycache__
 logs
 __pychace__
+test*
