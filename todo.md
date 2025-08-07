@@ -1,4 +1,4 @@
-- cli dialog to make config on first time
+- find and remove all unreacheable vars accidently added with error handling for requests
 - docker commmand to run getuserid.py
 - update readme
 - added group parameter to streamers.txt
