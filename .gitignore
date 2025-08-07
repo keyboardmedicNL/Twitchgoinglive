@@ -2,6 +2,7 @@ config/*.txt
 config/config.json
 config/embeds
 config/config.yaml
+config/config copy.yaml
 src/__pycache__
 logs
 __pychace__

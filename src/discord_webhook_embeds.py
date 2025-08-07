@@ -7,6 +7,7 @@ import time
 loaded_config = config_loader.load_config()
 time_before_retry = 60
 
+
 # webhook send to discord for goinglive message
 def discord_webhook_send(streamer_data: dict ) -> str:
     error_count = 0
@@ -160,7 +161,7 @@ def discord_webhook_delete(message_id: str):
                 error_count = error_count+1
                 time.sleep(time_before_retry)
         except Exception as e:
-                logging.error("attempted to delete message on discord with id: %s, response is %s with exception: %s waiting for %s seconds",message_id, delete_request_to_discord, e, time_before_retry)
+                logging.error("attempted to delete message on discord with id: %s, with exception: %s waiting for %s seconds",message_id, e, time_before_retry)
                 error_count = error_count+1
                 time.sleep(time_before_retry)
     if error_count == 4:

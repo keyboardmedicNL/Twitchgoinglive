@@ -92,6 +92,7 @@ def clean_up_old_embeds(list_of_streamers: list ,use_offline_message: bool):
 def main():
     sys.excepthook = log_exception
 
+    global loaded_config
     loaded_config = config()
         
     poll_interval_minutes = loaded_config.poll_interval*60
