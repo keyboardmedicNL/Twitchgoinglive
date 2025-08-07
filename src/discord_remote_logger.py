@@ -2,10 +2,8 @@ import config_loader
 import time
 import requests
 import logging
-import gotify_error_notifications
 
 loaded_config = config_loader.load_config()
-send_gotify_notification = gotify_error_notifications.send_gotify_notification
 
 
 # simple discord webhook send for remote logging
@@ -44,4 +42,3 @@ def discord_remote_log(title: str ,color: str ,description: str ,ping: bool):
             time.sleep(1)
         except Exception as e:
             logging.error("unable to send discord log message with exception: %s", e)
-            send_gotify_notification("goinglive",f"unable to send discord log message with exception: {e}","5")

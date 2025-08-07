@@ -1,11 +1,9 @@
 import config_loader
-import discord_remote_logger
 import os
 import logging
 
 # vars
 loaded_config = config_loader.load_config()
-discord_remote_log = discord_remote_logger.discord_remote_log
 
 # saves streamid to file
 def save_message_id_to_file(name: str ,message_id: str ,user_login: str):
