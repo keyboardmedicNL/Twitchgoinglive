@@ -2,3 +2,4 @@ config/*.txt
 config/config.json
 config/embeds
 config/config.yaml
+src/__pycache__

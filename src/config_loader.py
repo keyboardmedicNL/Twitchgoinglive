@@ -1,4 +1,9 @@
 import yaml
+import logging
+#import housey_logging
+
+#housey_logging.configure()
+#logger = logging.getLogger(__name__)
 
 default_config = {
     "twitch_api_id":"",
@@ -22,6 +27,6 @@ def load_config() -> dict:
         config_yaml = yaml.safe_load(config_file)
         merged_config = {**default_config, **config_yaml}
 
-    print("succesfully loaded config")
+    logging.info("succesfully loaded config")
 
     return(merged_config)

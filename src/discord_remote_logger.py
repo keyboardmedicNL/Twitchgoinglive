@@ -1,9 +1,15 @@
 import config_loader
 import time
 import requests
+import logging
+#import housey_logging
 
 # vars
+#housey_logging.configure()
+#logger = logging.getLogger(__name__)
+
 loaded_config = config_loader.load_config()
+
 
 # simple discord webhook send for remote logging
 def discord_remote_log(title: str ,color: str ,description: str ,ping: bool): 
@@ -35,7 +41,6 @@ def discord_remote_log(title: str ,color: str ,description: str ,ping: bool):
             ]}
         
         remote_log_send_request_to_discord = requests.post(loaded_config["discord_remote_log_url"], json=data_for_log_hook, params={'wait': 'true'})
-        if loaded_config["verbose"] >= 2:
-            print(f"sending message to discord remote log webhook with title: {title} Color: {color} Description: {description} and ping: {ping_string} . Discord response is {str(remote_log_send_request_to_discord)}")
+        logging.debug('sending message to discord remote log webhook with title: %s color: %s description: %s and ping %s . Discord response is: %s',title, color, description, ping_string, str(remote_log_send_request_to_discord))
         
         time.sleep(1)

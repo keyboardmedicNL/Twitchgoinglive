@@ -3,8 +3,13 @@ import random
 import requests
 import discord_remote_logger
 import gotify_error_notifications
+import logging
+#import housey_logging
 
 # vars
+#housey_logging.configure()
+#logger = logging.getLogger(__name__)
+
 loaded_config = config_loader.load_config()
 discord_remote_log = discord_remote_logger.discord_remote_log
 send_gotify_notification = gotify_error_notifications.send_gotify_notification
@@ -63,12 +68,11 @@ def discord_webhook_send(streamer_data: dict ) -> str:
     message_id = send_request_to_discord_json["id"]
 
     if send_request_to_discord.ok:
-        if loaded_config["verbose"] >= 1:
-            print(f"posting message to discord with id: {message_id} for user {username}, response is {send_request_to_discord}")
-            discord_remote_logger("Goinglivebot","green",f"posting message to discord with discord id: {message_id} for user {username}, response is {send_request_to_discord}",False)
+        logging.debug("posting message to discord with id: %s for user %s, response is %s",message_id, username, send_request_to_discord)
+        discord_remote_log("Goinglivebot","green",f"posting message to discord with discord id: {message_id} for user {username}, response is {send_request_to_discord}",False)
     else:
-        print(f"attempted to post message to discord with id: {message_id} for user {username}, response is {send_request_to_discord}")
-        discord_remote_logger("Goinglivebot","red",f"attempted to post message to discord with discord id: {message_id} for user {username}, response is {send_request_to_discord}",True)
+        logging.error("attempted to post message to discord with id: %s for user %s, response is %s",message_id, username, send_request_to_discord)
+        discord_remote_log("Goinglivebot","red",f"attempted to post message to discord with discord id: {message_id} for user {username}, response is {send_request_to_discord}",True)
         send_gotify_notification("Clipbot",f"attempted to post message to discord with discord id: {message_id} for user {username}, response is {send_request_to_discord}","5")
         
     return(message_id)
@@ -125,24 +129,22 @@ def discord_webhook_edit(streamer_data: dict,message_id: str):
     edit_request_to_discord = requests.patch(f"{loaded_config["discord_webhook_url"]}/messages/{message_id}", json=data_to_send_to_webhook, params={'wait': 'true'})
     
     if edit_request_to_discord.ok:
-        if loaded_config["verbose"] >= 1:
-            print(f"updating message to discord with id: {message_id} for user {username}, response is {edit_request_to_discord}")
-            discord_remote_logger("Goinglivebot","green",f"updating message to discord with discord id: {message_id} for user {username}, response is {edit_request_to_discord}",False)
+        logging.debug("updating message to discord with id: %s for user %s, response is %s",message_id, username, edit_request_to_discord)
+        discord_remote_log("Goinglivebot","green",f"updating message to discord with discord id: {message_id} for user {username}, response is {edit_request_to_discord}",False)
     else:
-        print(f"attempted to update message to discord with id: {message_id} for user {username}, response is {edit_request_to_discord}")
-        discord_remote_logger("Goinglivebot","red",f"attempted to update message to discord with discord id: {message_id} for user {username}, response is {edit_request_to_discord}",True)
+        logging.error("attempted to update message to discord with id: %s for user %s, response is %s",message_id, username, edit_request_to_discord)
+        discord_remote_log("Goinglivebot","red",f"attempted to update message to discord with discord id: {message_id} for user {username}, response is {edit_request_to_discord}",True)
         send_gotify_notification("Clipbot",f"attempted to update message to discord with discord id: {message_id} for user {username}, response is {edit_request_to_discord}","5")
 
 # deletes discord webhook message
 def discord_webhook_delete(message_id: str):
     delete_request_to_discord = requests.delete(f"{loaded_config["discord_webhook_url"]}/messages/{message_id}", params={'wait': 'true'})
     if delete_request_to_discord.ok:
-        if loaded_config["verbose"] >= 1:
-            print(f"deleting message om discord with id: {message_id}, response is {delete_request_to_discord}")
-            discord_remote_logger("Goinglivebot","green",f"deleting message om discord with id: {message_id}, response is {delete_request_to_discord}",False)
+        logging.debug("deleting message om discord with id: %s, response is %s",message_id, delete_request_to_discord)
+        discord_remote_log("Goinglivebot","green",f"deleting message om discord with id: {message_id}, response is {delete_request_to_discord}",False)
     else:
-        print(f"attempted to delete message on discord with id: {message_id}, response is {delete_request_to_discord}")
-        discord_remote_logger("Goinglivebot","red",f"attempted to delete message on discord with id: {message_id}, response is {delete_request_to_discord}",True)
+        logging.error("attempted to delete message on discord with id: %s, response is %s",message_id, delete_request_to_discord)
+        discord_remote_log("Goinglivebot","red",f"attempted to delete message on discord with id: {message_id}, response is {delete_request_to_discord}",True)
         send_gotify_notification("Clipbot",f"attempted to delete message on discord with id: {message_id}, response is {delete_request_to_discord}","5")
 
 # edits currently live embed to offline message
@@ -165,10 +167,9 @@ def discord_webhook_edit_to_offline(message_id: str ,filename: str):
     edit_to_offline_request_to_discord = requests.patch(f"{loaded_config["discord_webhook_url"]}/messages/{message_id}", json=data_to_send_to_webhook, params={'wait': 'true'})
 
     if edit_to_offline_request_to_discord.ok:
-        if loaded_config["verbose"] >= 1:
-            print(f"updating to offline message to discord with id: {message_id} for {filename}, response is {edit_to_offline_request_to_discord}")
-            discord_remote_logger("Goinglivebot","green",f"updating to offline message to discord with discord id: {message_id} for {filename}, response is {edit_to_offline_request_to_discord}",False)
+        logging.debug("updating to offline message to discord with id: %s for %s, response is %s",message_id, filename, edit_to_offline_request_to_discord)
+        discord_remote_log("Goinglivebot","green",f"updating to offline message to discord with discord id: {message_id} for {filename}, response is {edit_to_offline_request_to_discord}",False)
     else:
-        print(f"attempted to update offline message to discord with id: {message_id} for {filename}, response is {edit_to_offline_request_to_discord}")
-        discord_remote_logger("Goinglivebot","red",f"attempted to update offlinee message to discord with discord id: {message_id} for {filename}, response is {edit_to_offline_request_to_discord}",True)
+        logging.error("attempted to update offline message to discord with id: %s for %s, response is %s",message_id, filename, edit_to_offline_request_to_discord)
+        discord_remote_log("Goinglivebot","red",f"attempted to update offlinee message to discord with discord id: {message_id} for {filename}, response is {edit_to_offline_request_to_discord}",True)
         send_gotify_notification("Clipbot",f"attempted to update offline message to discord with discord id: {message_id} for {filename}, response is {edit_to_offline_request_to_discord}","5")
