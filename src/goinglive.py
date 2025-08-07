@@ -71,8 +71,6 @@ def create_embeds_folder():
         discord_remote_log("Goinglivebot","blue","embed folder was not found so it was created",False)
 
 def clean_up_old_embeds(list_of_streamers: list ,use_offline_message: bool):
-    logger.info("pulling list of streamers once to clean up old messages")
-    discord_remote_log("Goinglivebot","yellow","pulling list of streamers once to clean up old messages",False)
     for streamer in list_of_streamers:
         if exists(f"config/embeds/{streamer}.txt"):
             message_id_from_file,name_from_file = read_message_id_from_file(streamer)
@@ -103,6 +101,10 @@ def main():
         create_embeds_folder()
         # gets list of streamers once to clean up old embeds, ends script if it fails to get list of streamers
         token_from_twitch = read_twitch_api_token_from_file()
+        
+        logger.info("pulling list of streamers once to clean up old messages")
+        discord_remote_log("Goinglivebot","yellow","pulling list of streamers once to clean up old messages",False)
+        
         streamers, streamer_get_was_succesfull = get_streamers_from_file()
         if streamer_get_was_succesfull:
             clean_up_old_embeds(streamers, loaded_config.use_offline_messages)
