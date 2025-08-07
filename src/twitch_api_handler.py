@@ -2,32 +2,39 @@ import config_loader
 import requests
 from os.path import exists
 import logging
+import time
 
 # vars
 
 loaded_config = config_loader.load_config()
-
+time_before_retry = 60
 
 # renews token used for twitch api calls
 def get_token_from_twitch_api() -> str:
         error_count = 0
         while error_count < 4:
-            logging.info("Requesting new api auth token from twitch")
+            try:
+                logging.info("Requesting new api auth token from twitch")
 
-            get_token_from_twitch_request=requests.post("https://id.twitch.tv/oauth2/token", json={"client_id" : str(loaded_config.twitch_api_id), "client_secret" : str(loaded_config.twitch_api_secret), "grant_type":"client_credentials"})
-            
-            if get_token_from_twitch_request.ok:
-                get_token_from_twitch_json = get_token_from_twitch_request.json()
-                token_from_twitch = get_token_from_twitch_json["access_token"]
-                logging.debug("new twitch api auth token recieved")
-                with open(r'config/token.txt', 'w') as token_file:
-                    token_file.write("%s\n" % token_from_twitch)
+                get_token_from_twitch_request=requests.post("https://id.twitch.tv/oauth2/token", json={"client_id" : str(loaded_config.twitch_api_id), "client_secret" : str(loaded_config.twitch_api_secret), "grant_type":"client_credentials"})
+                
+                if get_token_from_twitch_request.ok:
+                    get_token_from_twitch_json = get_token_from_twitch_request.json()
+                    token_from_twitch = get_token_from_twitch_json["access_token"]
+                    logging.debug("new twitch api auth token recieved")
+                    with open(r'config/token.txt', 'w') as token_file:
+                        token_file.write("%s\n" % token_from_twitch)
 
-                break
+                    break
 
-            else:
-                logging.error("unable to request new twitch api auth token with response: %s",get_token_from_twitch_request)
+                else:
+                    logging.error("unable to request new twitch api auth token with response: %s waiting for %s seconds",get_token_from_twitch_request, time_before_retry)
+                    error_count = error_count+1
+                    time.sleep(time_before_retry)
+            except Exception as e:
+                logging.error("unable to request new twitch api auth token with response: %s with exception: %s waiting for %s seconds",get_token_from_twitch_request, e, time_before_retry)
                 error_count = error_count+1
+                time.sleep(time_before_retry)
         if error_count == 4:
             raise RuntimeError("Unable to request a new twitch api token after trying 3 times.")
         return(token_from_twitch)
@@ -56,12 +63,14 @@ def get_stream_json_from_twitch(streamer: str, token_from_twitch: str) -> tuple[
                     streamer_name = ""
                     break
             else:
+                logging.error("tried to get streamer information for %s with response: %s waiting for %s seconds",streamer, get_stream_json_from_twitch_request, time_before_retry)
                 error_count = error_count+1
-                logging.error("tried to get streamer information for %s with response: %s",streamer, get_stream_json_from_twitch_request)
+                time.sleep(time_before_retry)
 
         except Exception as e:
-            logging.error("tried to get streamer information for %s with response: %s with exception: %s",streamer, get_stream_json_from_twitch_request, e)
+            logging.error("tried to get streamer information for %s with response: %s with exception: %s waiting for %s seconds",streamer, get_stream_json_from_twitch_request, e, time_before_retry)
             error_count = error_count +1
+            time.sleep(time_before_retry)
     if error_count == 4:
         raise RuntimeError("Unable to get streamer info from twitch after trying 3 times.")
 

@@ -2,9 +2,10 @@ import config_loader
 import random
 import requests
 import logging
-
+import time
 
 loaded_config = config_loader.load_config()
+time_before_retry = 60
 
 # webhook send to discord for goinglive message
 def discord_webhook_send(streamer_data: dict ) -> str:
@@ -66,12 +67,13 @@ def discord_webhook_send(streamer_data: dict ) -> str:
                 logging.debug("posting message to discord with id: %s for user %s, response is %s",message_id, username, send_request_to_discord)
                 break
             else:
+                logging.error("tried posting message to discord with id: %s for user %s, response is %s waiting for %s seconds",message_id, username, send_request_to_discord, time_before_retry)
                 error_count = error_count+1
-                logging.error("tried posting message to discord with id: %s for user %s, response is %s",message_id, username, send_request_to_discord)
-    
+                time.sleep(time_before_retry)
         except Exception as e:
+                logging.error("attempted to post message to discord with id: %s for user %s, response is %s with exception: %s waiting for %s seconds",message_id, username, send_request_to_discord, e, time_before_retry)
                 error_count = error_count+1
-                logging.error("attempted to post message to discord with id: %s for user %s, response is %s with exception: %s",message_id, username, send_request_to_discord, e)
+                time.sleep(time_before_retry)
     if error_count == 4:
         raise RuntimeError("tried to create new webhook message on discord 3 times and failed")       
     return(message_id)
@@ -134,11 +136,13 @@ def discord_webhook_edit(streamer_data: dict,message_id: str):
                 logging.debug("updating message to discord with id: %s for user %s, response is %s",message_id, username, edit_request_to_discord)
                 break
             else:
+                logging.error("tried updating message to discord with id: %s for user %s, response is %s waiting for %s seconds",message_id, username, edit_request_to_discord, time_before_retry)
                 error_count = error_count+1
-                logging.error("tried updating message to discord with id: %s for user %s, response is %s",message_id, username, edit_request_to_discord)
+                time.sleep(time_before_retry)
         except Exception as e:
+            logging.error("attempted to update message to discord with id: %s for user %s, response is %s with exception: %e waiting for %s seconds",message_id, username, edit_request_to_discord, e, time_before_retry)
             error_count = error_count+1
-            logging.error("attempted to update message to discord with id: %s for user %s, response is %s with exception: %e",message_id, username, edit_request_to_discord, e)
+            time.sleep(time_before_retry)
     if error_count == 4:
         raise RuntimeError("tried to update discord webhook message 3 times and failed")
 
@@ -152,11 +156,13 @@ def discord_webhook_delete(message_id: str):
                 logging.debug("deleting message om discord with id: %s, response is %s",message_id, delete_request_to_discord)
                 break
             else:
+                logging.error("tried deleting message om discord with id: %s, response is %s waiting for %s seconds",message_id, delete_request_to_discord, time_before_retry)
                 error_count = error_count+1
-                logging.error("tried deleting message om discord with id: %s, response is %s",message_id, delete_request_to_discord)
+                time.sleep(time_before_retry)
         except Exception as e:
+                logging.error("attempted to delete message on discord with id: %s, response is %s with exception: %s waiting for %s seconds",message_id, delete_request_to_discord, e, time_before_retry)
                 error_count = error_count+1
-                logging.error("attempted to delete message on discord with id: %s, response is %s with exception: %s",message_id, delete_request_to_discord, e)
+                time.sleep(time_before_retry)
     if error_count == 4:
         raise RuntimeError("tried to delete discord webhook message 3 times and failed")
 
@@ -186,10 +192,12 @@ def discord_webhook_edit_to_offline(message_id: str ,filename: str):
                 logging.debug("updating to offline message to discord with id: %s for %s, response is %s",message_id, filename, edit_to_offline_request_to_discord)
                 break
             else:
+                logging.error("tried updating to offline message to discord with id: %s for %s, response is %s waiting for %s seconds",message_id, filename, edit_to_offline_request_to_discord, time_before_retry)    
                 error_count = error_count+1
-                logging.error("tried updating to offline message to discord with id: %s for %s, response is %s",message_id, filename, edit_to_offline_request_to_discord)    
+                time.sleep(time_before_retry)        
         except Exception as e:
+            logging.error("attempted to update offline message to discord with id: %s for %s, response is %s with exception %e waiting for %s seconds",message_id, filename, edit_to_offline_request_to_discord, e, time_before_retry)
             error_count = error_count+1
-            logging.error("attempted to update offline message to discord with id: %s for %s, response is %s with exception %e",message_id, filename, edit_to_offline_request_to_discord, e)
+            time.sleep(time_before_retry)
     if error_count == 4:
         raise RuntimeError("tried to edit discord webhook message to offline 3 times and failed")
