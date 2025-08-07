@@ -1,12 +1,12 @@
 # REQUIRED PARAMETERS
-twitch_api_id: # your twitch api id
-twitch_api_secret: # your twitch api secret
-discord_webhook_url: # webhook url from discord to post going live messages to
+twitch_api_id: YOUR_API_ID # your twitch api id
+twitch_api_secret: YOUR_API_SECRET # your twitch api secret
+discord_webhook_url: YOUR_WEBHOOK_URL # webhook url from discord to post going live messages to
 
 # everything below this is optional, uncomment the line (remove the #) if you want to use it
-#poll_interval: # time in minutes on how often the script should check if anyone is live DEFAULT: 10 minutes
+#poll_interval: 10 # time in minutes on how often the script should check if anyone is live DEFAULT: 10 minutes
 #allowed_categories: # a list of allowed categories your streamers need to be in for the bot to show a going live message DEFAULT all categories allowed
 #- djs
 #- music
-#message_before_embed: # a custom message to show above the going live embed message, can be used to ping roles or users DEFAULT ""
-#use_offline_messages: # wether or not the bot should delete the message when someone goes offline or should display an offline message instead DEFAULT false
+#message_before_embed: this is a message that shows above the embed # a custom message to show above the going live embed message, can be used to ping roles or users DEFAULT ""
+#use_offline_messages: false # wether or not the bot should delete the message when someone goes offline or should display an offline message instead DEFAULT false
