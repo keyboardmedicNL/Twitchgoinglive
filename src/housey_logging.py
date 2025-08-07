@@ -4,7 +4,7 @@ import logging
 def configure():
     logging.basicConfig(
         format='%(asctime)s %(levelname)s: [%(module)s.%(funcName)s:%(lineno)d]: %(message)s',
-        filename='./goinglive.log',
+        filename='./logs/goinglive.log',
         level=logging.DEBUG
     )
 
