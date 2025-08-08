@@ -43,14 +43,10 @@ def main():
             save_choice = input() 
 
             if save_choice.lower() == "y" or save_choice == "":
-                print("wich group would you like to assign the user too? (Default) or <user input>")
-                group = input()
-                if group == "":
-                    group = "default"
                 if not check_if_id_allready_in_streamers_file(user_id):
                     with open(f"config/streamers.txt", 'a') as streamers_file:
-                        streamers_file.write(f"\n{user_id} {group}")
-                    print(f"added new line to streamers.txt: {user_id} {group}")
+                        streamers_file.write(f"\n{user_id}")
+                    print(f"added new line to streamers.txt: {user_id}")
                 else:
                     print(f"{user_id} allready exsists in streamers.txt. skipping save...")
                 print("------")
