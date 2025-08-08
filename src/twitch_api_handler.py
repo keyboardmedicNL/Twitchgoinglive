@@ -32,7 +32,7 @@ def get_token_from_twitch_api() -> str:
                     error_count = error_count+1
                     time.sleep(time_before_retry)
             except Exception as e:
-                logging.error("unable to request new twitch api auth token with response: %s with exception: %s waiting for %s seconds",get_token_from_twitch_request, e, time_before_retry)
+                logging.error("unable to request new twitch api auth token with exception: %s waiting for %s seconds", e, time_before_retry)
                 error_count = error_count+1
                 time.sleep(time_before_retry)
         if error_count == 4:
@@ -68,7 +68,7 @@ def get_stream_json_from_twitch(streamer: str, token_from_twitch: str) -> tuple[
                 time.sleep(time_before_retry)
 
         except Exception as e:
-            logging.error("tried to get streamer information for %s with response: %s with exception: %s waiting for %s seconds",streamer, get_stream_json_from_twitch_request, e, time_before_retry)
+            logging.error("tried to get streamer information for %s with exception: %s waiting for %s seconds",streamer, e, time_before_retry)
             error_count = error_count +1
             time.sleep(time_before_retry)
     if error_count == 4:

@@ -55,7 +55,7 @@ def get_streamers_from_file() -> list:
                         error_count = error_count+1
                         time.sleep(time_before_retry)
                 except Exception as e:
-                    logger.error('was unable to get list of streamers trough request with response: %s with exception: %s waiting for %s seconds', get_streamers_trough_request_response, e, time_before_retry)
+                    logger.error('was unable to get list of streamers trough request with exception: %s waiting for %s seconds', e, time_before_retry)
                     error_count = error_count+1
                     time.sleep(time_before_retry)
             if error_count == 4:

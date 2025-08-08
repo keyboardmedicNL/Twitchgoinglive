@@ -72,7 +72,7 @@ def discord_webhook_send(streamer_data: dict ) -> str:
                 error_count = error_count+1
                 time.sleep(time_before_retry)
         except Exception as e:
-                logging.error("attempted to post message to discord with id: %s for user %s, response is %s with exception: %s waiting for %s seconds",message_id, username, send_request_to_discord, e, time_before_retry)
+                logging.error("attempted to post message to discord with id: %s for user %s with exception: %s waiting for %s seconds",message_id, username, e, time_before_retry)
                 error_count = error_count+1
                 time.sleep(time_before_retry)
     if error_count == 4:
@@ -141,7 +141,7 @@ def discord_webhook_edit(streamer_data: dict,message_id: str):
                 error_count = error_count+1
                 time.sleep(time_before_retry)
         except Exception as e:
-            logging.error("attempted to update message to discord with id: %s for user %s, response is %s with exception: %e waiting for %s seconds",message_id, username, edit_request_to_discord, e, time_before_retry)
+            logging.error("attempted to update message to discord with id: %s for user %s, with exception: %e waiting for %s seconds",message_id, username, e, time_before_retry)
             error_count = error_count+1
             time.sleep(time_before_retry)
     if error_count == 4:
@@ -197,7 +197,7 @@ def discord_webhook_edit_to_offline(message_id: str ,filename: str):
                 error_count = error_count+1
                 time.sleep(time_before_retry)        
         except Exception as e:
-            logging.error("attempted to update offline message to discord with id: %s for %s, response is %s with exception %e waiting for %s seconds",message_id, filename, edit_to_offline_request_to_discord, e, time_before_retry)
+            logging.error("attempted to update offline message to discord with id: %s for %s, with exception %e waiting for %s seconds",message_id, filename, e, time_before_retry)
             error_count = error_count+1
             time.sleep(time_before_retry)
     if error_count == 4:
