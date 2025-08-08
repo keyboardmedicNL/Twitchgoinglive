@@ -92,7 +92,6 @@ def clean_up_old_embeds(list_of_streamers: list ,use_offline_message: bool):
 def main():
     sys.excepthook = log_exception
 
-    global loaded_config
     loaded_config = config()
         
     poll_interval_minutes = loaded_config.poll_interval*60
@@ -110,8 +109,6 @@ def main():
     while True:
         streamers = get_streamers_from_file()
         for streamer in streamers:
-            # sets streamer name incase an exception is called before streamer_name is set with a function
-            streamer_name = "unknown"
             # gets streamer data from twitch api
             get_stream_json_from_twitch_response,get_stream_json_from_twitch_data,is_live,stream_category,streamer_name = get_stream_json_from_twitch(streamer,token_from_twitch)
             # if request to twitch api fails requests a new token from twitch and tries again
