@@ -1,4 +1,1 @@
-- docker commmand to run getuserid.py
-- update readme
-- added group parameter to streamers.txt
 - implement python virtual enviroment
