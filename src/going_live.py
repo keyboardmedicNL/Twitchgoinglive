@@ -43,6 +43,7 @@ def get_streamers_from_file() -> list:
     with open("config/streamers.txt", 'r') as file_with_streamer_ids:
         list_of_streamers = [line.rstrip() for line in file_with_streamer_ids]
         if "http" in list_of_streamers[0]:
+
             error_count = 0
             while error_count < 4:
                 try:
@@ -58,6 +59,7 @@ def get_streamers_from_file() -> list:
                     logger.error('was unable to get list of streamers trough request with exception: %s waiting for %s seconds', e, time_before_retry)
                     error_count = error_count+1
                     time.sleep(time_before_retry)
+
             if error_count == 4:
                 raise RuntimeError("tried to get list of streamers trough url 3 times and failed")
 
@@ -107,19 +109,24 @@ def main():
 
     # main loop
     while True:
+
         streamers = get_streamers_from_file()
+
         for streamer in streamers:
             # gets streamer data from twitch api
             get_stream_json_from_twitch_response,get_stream_json_from_twitch_data,is_live,stream_category,streamer_name = get_stream_json_from_twitch(streamer,token_from_twitch)
+            
             # if request to twitch api fails requests a new token from twitch and tries again
             if not get_stream_json_from_twitch_response.ok:
                 token_from_twitch = get_token_from_twitch_api()
                 get_stream_json_from_twitch_response,get_stream_json_from_twitch_data,is_live,stream_category,streamer_name = get_stream_json_from_twitch(streamer,token_from_twitch)
+            
             # checks if streamer is in allowed categories or if allowed categories is empty
             if is_live and (stream_category.lower() in loaded_config.allowed_categories or len(loaded_config.allowed_categories)==0):
                 
                 if stream_category.lower() in loaded_config.allowed_categories:
                     logger.info('%s for %s with name %s is found in allowed categories: %s', stream_category, streamer, streamer_name, loaded_config.allowed_categories)
+                
                 # updates embed if it allready exsists or creates it if not to discord webhook
                 if exists(f"config/embeds/{streamer}.txt"):
                     logger.info('embed allready exsists for %s with name %s, updating it',streamer, streamer_name)
