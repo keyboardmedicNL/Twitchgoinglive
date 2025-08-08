@@ -33,6 +33,7 @@ get_token_from_twitch_api = twitch_api_handler.get_token_from_twitch_api
 get_stream_json_from_twitch = twitch_api_handler.get_stream_json_from_twitch
 
 time_before_retry = 60
+max_errors_allowed = 3
 
 # functions
 def log_exception(type, value, tb):
@@ -45,22 +46,28 @@ def get_streamers_from_file() -> list:
         if "http" in list_of_streamers[0]:
 
             error_count = 0
-            while error_count < 4:
+            while error_count < max_errors_allowed:
                 try:
                     get_streamers_trough_request_response = requests.get(list_of_streamers[0])
                     if get_streamers_trough_request_response.ok:
                         list_of_streamers = get_streamers_trough_request_response.text.splitlines()
                         break
                     else:
-                        logger.error('was unable to get list of streamers trough request with response: %s with exception: %s waiting for %s seconds', get_streamers_trough_request_response, time_before_retry)
                         error_count = error_count+1
-                        time.sleep(time_before_retry)
-                except Exception as e:
-                    logger.error('was unable to get list of streamers trough request with exception: %s waiting for %s seconds', e, time_before_retry)
-                    error_count = error_count+1
-                    time.sleep(time_before_retry)
+                        remaining_errors = max_errors_allowed-error_count
 
-            if error_count == 4:
+                        if not error_count == max_errors_allowed:
+                            logger.error('was unable to get list of streamers trough request with response: %s with exception: %s trying %s more times and waiting for %s seconds', get_streamers_trough_request_response, remaining_errors, time_before_retry)
+                            time.sleep(time_before_retry)
+                except Exception as e:
+                    error_count = error_count+1
+                    remaining_errors = max_errors_allowed-error_count
+
+                    if not error_count == max_errors_allowed:
+                        logger.error('was unable to get list of streamers trough request with exception: %s trying %s more times and waiting for %s seconds', e, remaining_errors, time_before_retry)
+                        time.sleep(time_before_retry)
+
+            if error_count == max_errors_allowed:
                 raise RuntimeError("tried to get list of streamers trough url 3 times and failed")
 
     logger.info('list of streamers to poll from: %s', list_of_streamers)
