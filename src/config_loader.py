@@ -19,7 +19,7 @@ def load_config() -> dict:
     if merged_config.twitch_api_id == "YOUR_API_ID" or merged_config.twitch_api_secret == "YOUR_API_SECRET" or merged_config.discord_webhook_url == "YOUR_WEBHOOK_URL":
         raise RuntimeError("you are missing required values in your config. please fill them in and try again")
     else:
-        logging.info("succesfully loaded config")        
+        logging.debug("succesfully loaded config")        
         return(merged_config)
 
 
