@@ -6,10 +6,11 @@ default_config = {
     "twitch_api_secret":"",
     "discord_webhook_url":"",
     "poll_interval":10,
-    "allowed_categories":(),
+    "allowed_categories":[],
     "message_before_embed":"",
     "use_offline_messages":False,
-    "team_name": ""
+    "team_name": "",
+    "excluded_uids":[]
 }
 
 # loads config from file
