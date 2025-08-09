@@ -100,3 +100,42 @@ def read_twitch_api_token_from_file() -> str:
         twitch_api_token = get_token_from_twitch_api()
         
     return(twitch_api_token)
+
+# get list of team member uids
+def get_list_of_team_member_uids(team_name: str, api_id: str, api_token: str) -> list:
+    error_count = 0
+    while error_count < max_errors_allowed:
+        try:
+            logging.info("getting team data from twitch api")
+
+            get_team_data_response = requests.get(f"https://api.twitch.tv/helix/teams?name={team_name}", headers={'Authorization':f"Bearer {api_token}", 'Client-Id':api_id})
+
+            if get_team_data_response.ok:
+                team_data_json = get_team_data_response.json()
+                list_of_team_users = team_data_json["data"][0]["users"]
+
+                list_of_ids = []
+
+                for user in list_of_team_users:
+                    list_of_ids.append(user["user_id"])
+
+                return(list_of_ids)
+
+            else:
+                error_count = error_count+1
+                remaining_errors = max_errors_allowed-error_count
+
+                if not error_count == max_errors_allowed:
+                    logging.error("unable to request team data from twitch with response: %s trying %s more times and waiting for %s seconds",get_team_data_response, remaining_errors , time_before_retry)
+                    time.sleep(time_before_retry)
+
+        except Exception as e:
+            error_count = error_count+1
+            remaining_errors = max_errors_allowed-error_count
+
+            if not error_count == max_errors_allowed:
+                logging.error("unable to request team data from twitch with exception: %s trying %s more times and waiting for %s seconds", e, remaining_errors, time_before_retry)
+                time.sleep(time_before_retry)
+
+    if error_count == max_errors_allowed:
+        raise RuntimeError("Unable to request team data from after trying 3 times.")
