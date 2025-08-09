@@ -102,13 +102,13 @@ def read_twitch_api_token_from_file() -> str:
     return(twitch_api_token)
 
 # get list of team member uids
-def get_list_of_team_member_uids(team_name: str, api_id: str, api_token: str) -> list:
+def get_list_of_team_member_uids(team_name: str, api_token: str) -> list:
     error_count = 0
     while error_count < max_errors_allowed:
         try:
             logging.info("getting team data from twitch api")
 
-            get_team_data_response = requests.get(f"https://api.twitch.tv/helix/teams?name={team_name}", headers={'Authorization':f"Bearer {api_token}", 'Client-Id':api_id})
+            get_team_data_response = requests.get(f"https://api.twitch.tv/helix/teams?name={team_name}", headers={'Authorization':f"Bearer {api_token}", 'Client-Id':loaded_config.twitch_api_id})
 
             if get_team_data_response.ok:
                 team_data_json = get_team_data_response.json()

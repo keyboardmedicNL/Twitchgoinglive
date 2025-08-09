@@ -8,7 +8,8 @@ default_config = {
     "poll_interval":10,
     "allowed_categories":(),
     "message_before_embed":"",
-    "use_offline_messages":False
+    "use_offline_messages":False,
+    "team_name": ""
 }
 
 # loads config from file

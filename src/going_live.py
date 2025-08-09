@@ -31,6 +31,7 @@ remove_message_id_file = embed_file_handler.remove_message_id_file
 read_twitch_api_token_from_file = twitch_api_handler.read_twitch_api_token_from_file
 get_token_from_twitch_api = twitch_api_handler.get_token_from_twitch_api
 get_stream_json_from_twitch = twitch_api_handler.get_stream_json_from_twitch
+get_list_of_team_member_uids = twitch_api_handler.get_list_of_team_member_uids
 
 time_before_retry = 60
 max_errors_allowed = 3
@@ -40,35 +41,42 @@ def log_exception(type, value, tb):
     logger.exception("Uncaught exception: {0}".format(str(value)))
 
 # gets list of streamers to poll
-def get_streamers_from_file() -> list:
-    with open("config/streamers.txt", 'r') as file_with_streamer_ids:
-        list_of_streamers = [line.rstrip() for line in file_with_streamer_ids]
-        if "http" in list_of_streamers[0]:
+def get_list_of_streamers(token_from_twitch: str, team_name: str) -> list:
 
-            error_count = 0
-            while error_count < max_errors_allowed:
-                try:
-                    get_streamers_trough_request_response = requests.get(list_of_streamers[0])
-                    if get_streamers_trough_request_response.ok:
-                        list_of_streamers = get_streamers_trough_request_response.text.splitlines()
-                        break
-                    else:
+    if team_name == "":
+
+        # gets list of streamers from streamers.txt
+        with open("config/streamers.txt", 'r') as file_with_streamer_ids:
+            list_of_streamers = [line.rstrip() for line in file_with_streamer_ids]
+            if "http" in list_of_streamers[0]:
+
+                error_count = 0
+                while error_count < max_errors_allowed:
+                    try:
+                        get_streamers_trough_request_response = requests.get(list_of_streamers[0])
+                        if get_streamers_trough_request_response.ok:
+                            list_of_streamers = get_streamers_trough_request_response.text.splitlines()
+                            break
+                        else:
+                            error_count = error_count+1
+                            remaining_errors = max_errors_allowed-error_count
+
+                            if not error_count == max_errors_allowed:
+                                logger.error('was unable to get list of streamers trough request with response: %s with exception: %s trying %s more times and waiting for %s seconds', get_streamers_trough_request_response, remaining_errors, time_before_retry)
+                                time.sleep(time_before_retry)
+                    except Exception as e:
                         error_count = error_count+1
                         remaining_errors = max_errors_allowed-error_count
 
                         if not error_count == max_errors_allowed:
-                            logger.error('was unable to get list of streamers trough request with response: %s with exception: %s trying %s more times and waiting for %s seconds', get_streamers_trough_request_response, remaining_errors, time_before_retry)
+                            logger.error('was unable to get list of streamers trough request with exception: %s trying %s more times and waiting for %s seconds', e, remaining_errors, time_before_retry)
                             time.sleep(time_before_retry)
-                except Exception as e:
-                    error_count = error_count+1
-                    remaining_errors = max_errors_allowed-error_count
 
-                    if not error_count == max_errors_allowed:
-                        logger.error('was unable to get list of streamers trough request with exception: %s trying %s more times and waiting for %s seconds', e, remaining_errors, time_before_retry)
-                        time.sleep(time_before_retry)
-
-            if error_count == max_errors_allowed:
-                raise RuntimeError("tried to get list of streamers trough url 3 times and failed")
+                if error_count == max_errors_allowed:
+                    raise RuntimeError("tried to get list of streamers trough url 3 times and failed")
+                
+    else:
+        list_of_streamers = get_list_of_team_member_uids(team_name, token_from_twitch)
 
     logger.info('list of streamers to poll from: %s', list_of_streamers)
 
@@ -111,13 +119,13 @@ def main():
     
     logger.info("pulling list of streamers once to clean up old messages")
     
-    streamers = get_streamers_from_file()
+    streamers = get_list_of_streamers(token_from_twitch, loaded_config.team_name)
     clean_up_old_embeds(streamers, loaded_config.use_offline_messages)
 
     # main loop
     while True:
 
-        streamers = get_streamers_from_file()
+        streamers = get_list_of_streamers(token_from_twitch, loaded_config.team_name)
 
         for streamer in streamers:
             # gets streamer data from twitch api
