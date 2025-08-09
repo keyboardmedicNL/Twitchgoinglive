@@ -15,3 +15,5 @@ def configure():
     )
     logging.getLogger().addHandler(console)
 
+def log_exception(type, value, tb):
+    logging.exception("Uncaught exception: {0}".format(str(value)))

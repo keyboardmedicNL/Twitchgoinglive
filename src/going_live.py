@@ -37,8 +37,6 @@ time_before_retry = 60
 max_errors_allowed = 3
 
 # functions
-def log_exception(type, value, tb):
-    logger.exception("Uncaught exception: {0}".format(str(value)))
 
 # gets list of streamers to poll
 def get_list_of_streamers(token_from_twitch: str, team_name: str) -> list:
@@ -107,7 +105,7 @@ def clean_up_old_embeds(list_of_streamers: list ,use_offline_message: bool):
     logger.info("removed all remaining files in config/embeds/")
 
 def main():
-    sys.excepthook = log_exception
+    sys.excepthook = housey_logging.log_exception()
 
     loaded_config = config()
         
