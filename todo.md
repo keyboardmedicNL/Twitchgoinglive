@@ -1,1 +1,2 @@
 - add docstrings to functions
+- make docker container crash when exception is raised

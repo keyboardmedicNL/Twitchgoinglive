@@ -105,7 +105,7 @@ def clean_up_old_embeds(list_of_streamers: list ,use_offline_message: bool):
     logger.info("removed all remaining files in config/embeds/")
 
 def main():
-    sys.excepthook = housey_logging.log_exception()
+    sys.excepthook = housey_logging.log_exception
 
     loaded_config = config()
         
