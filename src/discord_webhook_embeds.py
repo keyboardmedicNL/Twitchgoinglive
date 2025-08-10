@@ -8,7 +8,7 @@ loaded_config = config_loader.load_config()
 time_before_retry = 60
 max_errors_allowed = 3
 
-def random_color_generator() -> int:
+def random_color_generator() -> str:
 
     rgb_list = []
 
@@ -17,11 +17,12 @@ def random_color_generator() -> int:
         rgb_list.append(color)
 
     color_decimal = int(rgb_list[0]) * 65536 + int(rgb_list[1]) * 256 + int(rgb_list[2])
+    color_decimal_string = str(color_decimal)
 
-    return(color_decimal)
+    return(color_decimal_string)
 
 # webhook send to discord for goinglive message
-def discord_webhook_send(streamer_data: dict ) -> str:
+def discord_webhook_send(streamer_data: dict ) -> tuple[str ,str]:
     error_count = 0
     while error_count < max_errors_allowed:
         try:
@@ -99,14 +100,13 @@ def discord_webhook_send(streamer_data: dict ) -> str:
 
     if error_count == max_errors_allowed:
         raise RuntimeError("tried to create new webhook message on discord 3 times and failed")       
-    return(message_id)
+    return(message_id, color)
     
 # edits discord webhook message
-def discord_webhook_edit(streamer_data: dict,message_id: str):
+def discord_webhook_edit(streamer_data: dict,message_id: str, embed_color: str):
     error_count = 0
     while error_count < max_errors_allowed:
         try:
-            color = random_color_generator()
 
             username = streamer_data["data"][0]["user_name"]
             user = streamer_data["data"][0]["user_login"]
@@ -124,6 +124,7 @@ def discord_webhook_edit(streamer_data: dict,message_id: str):
                     "title": f":red_circle: {username} is now live!",
                     "description": title,
                     "url": f"https://www.twitch.tv/{user}",
+                    "color": embed_color,
                     "fields": [
                         {
                             "name": "Playing:",
@@ -207,17 +208,18 @@ def discord_webhook_delete(message_id: str):
         raise RuntimeError("tried to delete discord webhook message 3 times and failed")
 
 # edits currently live embed to offline message
-def discord_webhook_edit_to_offline(message_id: str ,filename: str):
+def discord_webhook_edit_to_offline(message_id: str ,filename: str, embed_color: str):
+
     error_count = 0
     while error_count < max_errors_allowed:
-        try:
-            color = random_color_generator()
 
+        try:
             data_to_send_to_webhook = {"content": loaded_config.message_before_embed, "embeds": [
                     {
                     "title": f":x: {filename} has gone offline!",
                     "description": "",
                     "url": f"https://www.twitch.tv/{filename.lower()}",
+                    "color": embed_color,
                     "fields": [
                         {
                         "name": "",

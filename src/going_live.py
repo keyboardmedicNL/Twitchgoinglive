@@ -89,9 +89,9 @@ def create_embeds_folder():
 def clean_up_old_embeds(list_of_streamers: list ,use_offline_message: bool):
     for streamer in list_of_streamers:
         if exists(f"config/embeds/{streamer}.txt"):
-            message_id_from_file,name_from_file = read_message_id_from_file(streamer)
+            message_id_from_file,name_from_file, embed_color = read_message_id_from_file(streamer)
             if use_offline_message:
-                discord_webhook_edit_to_offline(message_id_from_file,name_from_file)
+                discord_webhook_edit_to_offline(message_id_from_file, name_from_file, embed_color)
             else:
                 discord_webhook_delete(message_id_from_file)
             remove_message_id_file(streamer)
@@ -130,12 +130,12 @@ def main():
             if int(streamer) not in loaded_config.excluded_uids:
 
                 # gets streamer data from twitch api
-                get_stream_json_from_twitch_response,get_stream_json_from_twitch_data,is_live,stream_category,streamer_name = get_stream_json_from_twitch(streamer,token_from_twitch)
+                get_stream_json_from_twitch_response, get_stream_json_from_twitch_data, is_live, stream_category,streamer_name = get_stream_json_from_twitch(streamer, token_from_twitch)
                 
                 # if request to twitch api fails requests a new token from twitch and tries again
                 if not get_stream_json_from_twitch_response.ok:
                     token_from_twitch = get_token_from_twitch_api()
-                    get_stream_json_from_twitch_response,get_stream_json_from_twitch_data,is_live,stream_category,streamer_name = get_stream_json_from_twitch(streamer,token_from_twitch)
+                    get_stream_json_from_twitch_response,get_stream_json_from_twitch_data, is_live, stream_category, streamer_name = get_stream_json_from_twitch(streamer, token_from_twitch)
                 
                 # checks if streamer is in allowed categories or if allowed categories is empty
                 if is_live and (stream_category.lower() in loaded_config.allowed_categories or len(loaded_config.allowed_categories)==0):
@@ -146,21 +146,21 @@ def main():
                     # updates embed if it allready exsists or creates it if not to discord webhook
                     if exists(f"config/embeds/{streamer}.txt"):
                         logger.info('embed allready exsists for %s with name %s, updating it',streamer, streamer_name)
-                        message_id_from_file,name_from_file = read_message_id_from_file(streamer)
-                        discord_webhook_edit(get_stream_json_from_twitch_data,message_id_from_file)
+                        message_id_from_file, name_from_file, embed_color = read_message_id_from_file(streamer)
+                        discord_webhook_edit(get_stream_json_from_twitch_data, message_id_from_file, embed_color)
                     else:
                         logger.info('no embed exsists for %s with name %s, creating it',streamer, streamer_name)
-                        message_id = discord_webhook_send(get_stream_json_from_twitch_data)
-                        save_message_id_to_file(streamer,message_id,streamer_name)
+                        message_id, embed_color = discord_webhook_send(get_stream_json_from_twitch_data)
+                        save_message_id_to_file(streamer, message_id, streamer_name, embed_color)
                 
                 else:
                     # removes embed if offline or uses offline message
                     if exists(f"config/embeds/{streamer}.txt"):
                         logger.info('%s with name %s is no longer live',streamer, streamer_name)
-                        message_id_from_file,name_from_file = read_message_id_from_file(streamer)
+                        message_id_from_file, name_from_file, embed_color = read_message_id_from_file(streamer)
                         
                         if loaded_config.use_offline_messages:
-                            discord_webhook_edit_to_offline(message_id_from_file,name_from_file)
+                            discord_webhook_edit_to_offline(message_id_from_file, name_from_file, embed_color)
                         else:
                             discord_webhook_delete(message_id_from_file)
                         remove_message_id_file(streamer)
