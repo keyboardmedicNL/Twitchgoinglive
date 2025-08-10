@@ -145,7 +145,7 @@ def main():
                     # updates embed if it allready exsists or creates it if not to discord webhook
                     if exists(f"config/embeds/{streamer}.txt"):
                         logger.info('embed allready exsists for %s with name %s, updating it',streamer, streamer_name)
-                        message_id_from_file, name_from_file, embed_color = read_message_id_from_file(streamer)
+                        message_id_from_file, name_from_file, embed_color, _ = read_message_id_from_file(streamer)
                         discord_webhook_edit(get_stream_json_from_twitch_data, message_id_from_file, embed_color)
                     else:
                         logger.info('no embed exsists for %s with name %s, creating it',streamer, streamer_name)
