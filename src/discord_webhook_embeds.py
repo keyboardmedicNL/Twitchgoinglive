@@ -2,7 +2,6 @@ import config_loader
 import random
 import requests
 import logging
-import time
 import requests_error_handler
 
 loaded_config = config_loader.load_config()
