@@ -31,6 +31,10 @@ discord_webhook_url: YOUR_WEBHOOK_URL # webhook url from discord to post going l
 #- music
 #message_before_embed: this is a message that shows above the embed # a custom message to show above the going live embed message, can be used to ping roles or users DEFAULT ""
 #use_offline_messages: false # wether or not the bot should delete the message when someone goes offline or should display an offline message instead DEFAULT false
+#team_name: YOUR_TEAM_NAME # add the name of a twitch team to use the list of members in a twitch team to check instead of streamers.txt
+#excluded_uids: # list of uids to exclude from the bot, usefull if you poll an entire team and want to leave out certain members of team
+# - 123456
+# - 234567
 ```
 
 5. create a streamers.txt file in the config folder and add the user id of every streamer you want to poll on a new line, alternativly add a url to a txt file that contains the list to poll (if you dont have the user id you can use https://www.streamweasels.com/tools/convert-twitch-username-to-user-id/ to get the id from the twitch api, alternativly there is a included getuserid.py script you can run in a terminal to get it yourself from the api)
