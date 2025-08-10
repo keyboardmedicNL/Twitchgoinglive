@@ -8,11 +8,25 @@ loaded_config = config_loader.load_config()
 time_before_retry = 60
 max_errors_allowed = 3
 
+def random_color_generator() -> int:
+
+    rgb_list = []
+
+    for index in range(3):
+        color = random.randint(0,255)
+        rgb_list.append(color)
+
+    color_decimal = int(rgb_list[0]) * 65536 + int(rgb_list[1]) * 256 + int(rgb_list[2])
+
+    return(color_decimal)
+
 # webhook send to discord for goinglive message
 def discord_webhook_send(streamer_data: dict ) -> str:
     error_count = 0
     while error_count < max_errors_allowed:
         try:
+            color = random_color_generator()
+
             username = streamer_data["data"][0]["user_name"]
             user = streamer_data["data"][0]["user_login"]
             title = streamer_data["data"][0]["title"]
@@ -29,7 +43,7 @@ def discord_webhook_send(streamer_data: dict ) -> str:
                     "title": f":red_circle: {username} is now live!",
                     "description": title,
                     "url": f"https://www.twitch.tv/{user}",
-                    "color": 6570404,
+                    "color": color,
                     "fields": [
                         {
                             "name": "Playing:",
@@ -80,7 +94,7 @@ def discord_webhook_send(streamer_data: dict ) -> str:
                 remaining_errors = max_errors_allowed-error_count
 
                 if not error_count == max_errors_allowed:
-                    logging.error("attempted to post message to discord with id: %s for user %s with exception: trying %s more times and %s waiting for %s seconds",message_id, username, e, remaining_errors, time_before_retry)
+                    logging.error("attempted to post message to discord with exception: %s trying %s more times and waiting for %s seconds", e, remaining_errors, time_before_retry)
                     time.sleep(time_before_retry)
 
     if error_count == max_errors_allowed:
@@ -92,6 +106,8 @@ def discord_webhook_edit(streamer_data: dict,message_id: str):
     error_count = 0
     while error_count < max_errors_allowed:
         try:
+            color = random_color_generator()
+
             username = streamer_data["data"][0]["user_name"]
             user = streamer_data["data"][0]["user_login"]
             title = streamer_data["data"][0]["title"]
@@ -108,7 +124,6 @@ def discord_webhook_edit(streamer_data: dict,message_id: str):
                     "title": f":red_circle: {username} is now live!",
                     "description": title,
                     "url": f"https://www.twitch.tv/{user}",
-                    "color": 6570404,
                     "fields": [
                         {
                             "name": "Playing:",
@@ -157,7 +172,7 @@ def discord_webhook_edit(streamer_data: dict,message_id: str):
             remaining_errors = max_errors_allowed-error_count
 
             if not error_count == max_errors_allowed:
-                logging.error("attempted to update message to discord with id: %s for user %s, with exception: %e trying %s more times and waiting for %s seconds",message_id, username, e, remaining_errors,  time_before_retry)
+                logging.error("attempted to update message to discord with exception: %e trying %s more times and waiting for %s seconds", e, remaining_errors,  time_before_retry)
                 time.sleep(time_before_retry)
 
     if error_count == max_errors_allowed:
@@ -185,7 +200,7 @@ def discord_webhook_delete(message_id: str):
                 remaining_errors = max_errors_allowed-error_count
 
                 if not error_count == max_errors_allowed:
-                    logging.error("attempted to delete message on discord with id: %s, with exception: %s trying %s more times and waiting for %s seconds",message_id, e, remaining_errors, time_before_retry)
+                    logging.error("attempted to delete message on discord with exception: %s trying %s more times and waiting for %s seconds", e, remaining_errors, time_before_retry)
                     time.sleep(time_before_retry)
 
     if error_count == max_errors_allowed:
@@ -196,12 +211,13 @@ def discord_webhook_edit_to_offline(message_id: str ,filename: str):
     error_count = 0
     while error_count < max_errors_allowed:
         try:
+            color = random_color_generator()
+
             data_to_send_to_webhook = {"content": loaded_config.message_before_embed, "embeds": [
                     {
                     "title": f":x: {filename} has gone offline!",
                     "description": "",
                     "url": f"https://www.twitch.tv/{filename.lower()}",
-                    "color": 6570404,
                     "fields": [
                         {
                         "name": "",
@@ -229,7 +245,7 @@ def discord_webhook_edit_to_offline(message_id: str ,filename: str):
             remaining_errors = max_errors_allowed-error_count
 
             if not error_count == max_errors_allowed:
-                logging.error("attempted to update offline message to discord with id: %s for %s, with exception %e trying %s more times and waiting for %s seconds",message_id, filename, e, remaining_errors, time_before_retry)
+                logging.error("attempted to update offline message to discord with exception %e trying %s more times and waiting for %s seconds", e, remaining_errors, time_before_retry)
                 time.sleep(time_before_retry)
 
     if error_count == max_errors_allowed:
