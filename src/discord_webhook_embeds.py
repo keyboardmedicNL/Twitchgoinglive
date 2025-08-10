@@ -22,7 +22,7 @@ def random_color_generator() -> str:
     return(color_decimal_string)
 
 # webhook send to discord for goinglive message
-def discord_webhook_send(streamer_data: dict ) -> tuple[str ,str]:
+def discord_webhook_send(streamer_data: dict ) -> tuple[str ,str, str]:
     error_count = 0
     while error_count < max_errors_allowed:
         try:
@@ -38,8 +38,14 @@ def discord_webhook_send(streamer_data: dict ) -> tuple[str ,str]:
 
             if streamer_data["data"][0]["game_name"] == "":
                 game = "none"
+
+            message_before_embed = loaded_config.message_before_embed
+            if "<username>" in message_before_embed:
+                message_with_username = message_before_embed.replace("<username>", username)
+            else:
+                message_with_username = message_before_embed
             
-            data_to_send_to_webhook = {"content": loaded_config.message_before_embed,"embeds": [
+            data_to_send_to_webhook = {"content": message_with_username,"embeds": [
                     {
                     "title": f":red_circle: {username} is now live!",
                     "description": title,
@@ -100,7 +106,7 @@ def discord_webhook_send(streamer_data: dict ) -> tuple[str ,str]:
 
     if error_count == max_errors_allowed:
         raise RuntimeError("tried to create new webhook message on discord 3 times and failed")       
-    return(message_id, color)
+    return(message_id, color, username)
     
 # edits discord webhook message
 def discord_webhook_edit(streamer_data: dict,message_id: str, embed_color: str):
@@ -119,7 +125,13 @@ def discord_webhook_edit(streamer_data: dict,message_id: str, embed_color: str):
             if streamer_data["data"][0]["game_name"] == "":
                 game = "none"
             
-            data_to_send_to_webhook = {"content": loaded_config.message_before_embed, "embeds": [
+            message_before_embed = loaded_config.message_before_embed
+            if "<username>" in message_before_embed:
+                message_with_username = message_before_embed.replace("<username>", username)
+            else:
+                message_with_username = message_before_embed
+
+            data_to_send_to_webhook = {"content": message_with_username, "embeds": [
                     {
                     "title": f":red_circle: {username} is now live!",
                     "description": title,
@@ -208,13 +220,19 @@ def discord_webhook_delete(message_id: str):
         raise RuntimeError("tried to delete discord webhook message 3 times and failed")
 
 # edits currently live embed to offline message
-def discord_webhook_edit_to_offline(message_id: str ,filename: str, embed_color: str):
+def discord_webhook_edit_to_offline(message_id: str ,filename: str, embed_color: str, username: str):
 
     error_count = 0
     while error_count < max_errors_allowed:
+        
+        message_before_embed = loaded_config.message_before_embed
+        if "<username>" in message_before_embed:
+            message_with_username = message_before_embed.replace("<username>", username)
+        else:
+            message_with_username = message_before_embed
 
         try:
-            data_to_send_to_webhook = {"content": loaded_config.message_before_embed, "embeds": [
+            data_to_send_to_webhook = {"content": message_with_username, "embeds": [
                     {
                     "title": f":x: {filename} has gone offline!",
                     "description": "",
