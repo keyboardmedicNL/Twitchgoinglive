@@ -6,6 +6,7 @@ import requests_error_handler
 # vars
 
 loaded_config = config_loader.load_config()
+
 init_error_handler = requests_error_handler.init_error_handler
 handle_response_not_ok = requests_error_handler.handle_response_not_ok
 handle_request_exception = requests_error_handler.handle_request_exception
