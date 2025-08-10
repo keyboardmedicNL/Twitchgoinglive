@@ -2,6 +2,7 @@ import config_loader
 import requests
 import logging
 import requests_error_handler
+import time
 
 # vars
 
@@ -35,11 +36,14 @@ def get_token_from_twitch_api() -> str:
                 else:
                     error_count, remaining_errors = handle_response_not_ok(error_count)
                     logging.error("unable to request new twitch api auth token with response: %s trying %s more times and waiting for %s seconds",get_token_from_twitch_request, remaining_errors , time_before_retry)
-
+                    if error_count != max_errors_allowed:
+                        time.sleep(time_before_retry)
 
             except Exception as e:
                     error_count, remaining_errors = handle_request_exception(error_count)
                     logging.error("unable to request new twitch api auth token with exception: %s trying %s more times and waiting for %s seconds", e, remaining_errors, time_before_retry)
+                    if error_count != max_errors_allowed:
+                        time.sleep(time_before_retry)
 
         if error_count == max_errors_allowed:
             raise_no_more_tries_exception(max_errors_allowed)
@@ -75,11 +79,15 @@ def get_stream_json_from_twitch(streamer: str, token_from_twitch: str) -> tuple[
             else:
                 error_count, remaining_errors = handle_response_not_ok(error_count)
                 logging.error("tried to get streamer information for %s with response: %s trying %s more times and waiting for %s seconds",streamer, get_stream_json_from_twitch_request, remaining_errors, time_before_retry)
+                if error_count != max_errors_allowed:
+                    time.sleep(time_before_retry)
 
         except Exception as e:
             error_count, remaining_errors = handle_request_exception(error_count)
             logging.error("tried to get streamer information for %s with exception: %s trying %s more times and waiting for %s seconds",streamer, e, remaining_errors , time_before_retry)
-            
+            if error_count != max_errors_allowed:
+                time.sleep(time_before_retry)
+
     if error_count == max_errors_allowed:
          raise_no_more_tries_exception(max_errors_allowed)
 
@@ -109,10 +117,14 @@ def get_list_of_team_member_uids(team_name: str, api_token: str) -> list:
             else:
                 error_count, remaining_errors = handle_response_not_ok(error_count)
                 logging.error("unable to request team data from twitch with response: %s trying %s more times and waiting for %s seconds",get_team_data_response, remaining_errors , time_before_retry)
+                if error_count != max_errors_allowed:
+                    time.sleep(time_before_retry)
 
         except Exception as e:
                 error_count, remaining_errors = handle_request_exception(error_count)
                 logging.error("unable to request team data from twitch with exception: %s trying %s more times and waiting for %s seconds", e, remaining_errors, time_before_retry)
+                if error_count != max_errors_allowed:
+                    time.sleep(time_before_retry)
 
     if error_count == max_errors_allowed:
         raise_no_more_tries_exception(max_errors_allowed)

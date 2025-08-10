@@ -67,12 +67,16 @@ def get_list_of_streamers(token_from_twitch: str, team_name: str) -> list:
                             break
 
                         else:
-                            logging.error('was unable to get list of streamers trough request with response: %s with exception: %s trying %s more times and waiting for %s seconds', get_streamers_trough_request_response, remaining_errors, time_before_retry)
                             error_count, remaining_errors = handle_response_not_ok(error_count)
+                            logging.error('was unable to get list of streamers trough request with response: %s with exception: %s trying %s more times and waiting for %s seconds', get_streamers_trough_request_response, remaining_errors, time_before_retry)
+                            if error_count != max_errors_allowed:
+                                time.sleep(time_before_retry)
 
                     except Exception as e:
-                        logger.error('was unable to get list of streamers trough request with exception: %s trying %s more times and waiting for %s seconds', e, remaining_errors, time_before_retry)
                         error_count, remaining_errors = handle_request_exception(error_count)
+                        logger.error('was unable to get list of streamers trough request with exception: %s trying %s more times and waiting for %s seconds', e, remaining_errors, time_before_retry)
+                        if error_count != max_errors_allowed:
+                            time.sleep(time_before_retry)
 
                 if error_count == max_errors_allowed:
                     raise_no_more_tries_exception(max_errors_allowed)

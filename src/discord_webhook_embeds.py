@@ -3,6 +3,7 @@ import random
 import requests
 import logging
 import requests_error_handler
+import time
 
 loaded_config = config_loader.load_config()
 
@@ -121,11 +122,15 @@ def discord_webhook_send(streamer_data: dict ) -> tuple[str ,str, str]:
             else:
                 error_count, remaining_errors = handle_response_not_ok(error_count)
                 logging.error("tried posting message to discord with id: %s for user %s, response is %s trying %s more times and waiting for %s seconds",message_id, username, send_request_to_discord, remaining_errors , time_before_retry)
-                    
+                if error_count != max_errors_allowed:
+                    time.sleep(time_before_retry)
+
         except Exception as e:
                 error_count, remaining_errors = handle_request_exception(error_count)
                 logging.error("attempted to post message to discord with exception: %s trying %s more times and waiting for %s seconds", e, remaining_errors, time_before_retry)
-
+                if error_count != max_errors_allowed:
+                    time.sleep(time_before_retry)
+                                
     if error_count == max_errors_allowed:
         raise_no_more_tries_exception(max_errors_allowed)
     
@@ -146,11 +151,14 @@ def discord_webhook_edit(streamer_data: dict,message_id: str, embed_color: str):
             else:
                 error_count, remaining_errors = handle_response_not_ok(error_count)
                 logging.error("tried updating message to discord with id: %s for user %s, response is %s trying %s more times and waiting for %s seconds",message_id, username, edit_request_to_discord, remaining_errors,  time_before_retry)
+                if error_count != max_errors_allowed:
+                    time.sleep(time_before_retry)
 
         except Exception as e:
             error_count, remaining_errors = handle_request_exception(error_count)
             logging.error("attempted to update message to discord with exception: %e trying %s more times and waiting for %s seconds", e, remaining_errors,  time_before_retry)
-
+            if error_count != max_errors_allowed:
+                time.sleep(time_before_retry)
 
     if error_count == max_errors_allowed:
         raise_no_more_tries_exception(max_errors_allowed)
@@ -172,10 +180,14 @@ def discord_webhook_delete(message_id: str):
             else:
                 error_count, remaining_errors = handle_response_not_ok(error_count)
                 logging.error("tried deleting message om discord with id: %s, response is %s trying %s more times and waiting for %s seconds",message_id, delete_request_to_discord, remaining_errors, time_before_retry)
+                if error_count != max_errors_allowed:
+                    time.sleep(time_before_retry)
 
         except Exception as e:
             error_count, remaining_errors = handle_request_exception(error_count)
             logging.error("attempted to delete message on discord with exception: %s trying %s more times and waiting for %s seconds", e, remaining_errors, time_before_retry)
+            if error_count != max_errors_allowed:
+                time.sleep(time_before_retry)
 
     if error_count == max_errors_allowed:
         raise_no_more_tries_exception(max_errors_allowed)
@@ -209,13 +221,18 @@ def discord_webhook_edit_to_offline(message_id: str ,filename: str, embed_color:
             if edit_to_offline_request_to_discord.ok:
                 logging.debug("updating to offline message to discord with id: %s for %s, response is %s",message_id, filename, edit_to_offline_request_to_discord)
                 break
+
             else:
                 error_count, remaining_errors = handle_response_not_ok(error_count)
                 logging.error("tried updating to offline message to discord with id: %s for %s, response is %s trying %s more times and waiting for %s seconds",message_id, filename, edit_to_offline_request_to_discord, remaining_errors, time_before_retry)    
+                if error_count != max_errors_allowed:
+                    time.sleep(time_before_retry)
 
         except Exception as e:
             error_count, remaining_errors = handle_request_exception(error_count)
             logging.error("attempted to update offline message to discord with exception %e trying %s more times and waiting for %s seconds", e, remaining_errors, time_before_retry)
+            if error_count != max_errors_allowed:
+                time.sleep(time_before_retry)
 
     if error_count == max_errors_allowed:
         raise_no_more_tries_exception(max_errors_allowed)
