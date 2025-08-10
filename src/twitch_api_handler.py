@@ -1,6 +1,5 @@
 import config_loader
 import requests
-from os.path import exists
 import logging
 import time
 
@@ -56,7 +55,7 @@ def get_stream_json_from_twitch(streamer: str, token_from_twitch: str) -> tuple[
     error_count = 0
 
     while error_count < max_errors_allowed:
-        
+
         try:
             get_stream_json_from_twitch_request=requests.get(f"https://api.twitch.tv/helix/streams?&user_id={streamer}", headers={'Authorization':f"Bearer {token_from_twitch}", 'Client-Id':loaded_config.twitch_api_id})
             logging.debug("tried to get streamer information for %s with response: %s",streamer, get_stream_json_from_twitch_request)
