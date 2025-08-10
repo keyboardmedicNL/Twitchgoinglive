@@ -8,44 +8,13 @@ loaded_config = config_loader.load_config()
 time_before_retry = 60
 max_errors_allowed = 3
 
-def random_color_generator() -> str:
+def parse_data_for_webhook(streamer_data: dict, color: str) -> tuple[dict, str]:
 
-    rgb_list = []
+    username, user, title, game, viewers, started, thumbnail = parse_streamer_data(streamer_data)
 
-    for index in range(3):
-        color = random.randint(0,255)
-        rgb_list.append(color)
+    message_before_embed = parse_username_for_embed(username)
 
-    color_decimal = int(rgb_list[0]) * 65536 + int(rgb_list[1]) * 256 + int(rgb_list[2])
-    color_decimal_string = str(color_decimal)
-
-    return(color_decimal_string)
-
-# webhook send to discord for goinglive message
-def discord_webhook_send(streamer_data: dict ) -> tuple[str ,str, str]:
-    error_count = 0
-    while error_count < max_errors_allowed:
-        try:
-            color = random_color_generator()
-
-            username = streamer_data["data"][0]["user_name"]
-            user = streamer_data["data"][0]["user_login"]
-            title = streamer_data["data"][0]["title"]
-            game = streamer_data["data"][0]["game_name"]
-            viewers = streamer_data["data"][0]["viewer_count"]
-            started = streamer_data["data"][0]["started_at"]
-            thumbnail = streamer_data["data"][0]["thumbnail_url"]
-
-            if streamer_data["data"][0]["game_name"] == "":
-                game = "none"
-
-            message_before_embed = loaded_config.message_before_embed
-            if "<username>" in message_before_embed:
-                message_with_username = message_before_embed.replace("<username>", username)
-            else:
-                message_with_username = message_before_embed
-            
-            data_to_send_to_webhook = {"content": message_with_username,"embeds": [
+    data_to_send_to_webhook = {"content": message_before_embed,"embeds": [
                     {
                     "title": f":red_circle: {username} is now live!",
                     "description": title,
@@ -80,7 +49,60 @@ def discord_webhook_send(streamer_data: dict ) -> tuple[str ,str, str]:
                     },    
                     }
                 ]}
+    
+    return(data_to_send_to_webhook, username)
+
+def parse_streamer_data(streamer_data: dict) -> tuple[str, str, str, str, str, str, str]:
+    
+    username = streamer_data["data"][0]["user_name"]
+    user = streamer_data["data"][0]["user_login"]
+    title = streamer_data["data"][0]["title"]
+    game = streamer_data["data"][0]["game_name"]
+    viewers = streamer_data["data"][0]["viewer_count"]
+    started = streamer_data["data"][0]["started_at"]
+    thumbnail = streamer_data["data"][0]["thumbnail_url"]
+
+    if streamer_data["data"][0]["game_name"] == "":
+        game = "none"
+
+    return(username, user, title, game, viewers, started, thumbnail)
+
+def parse_username_for_embed(username: str) -> str:
+
+    message_before_embed = loaded_config.message_before_embed
+
+    if "<username>" in message_before_embed:
+        message_with_username = message_before_embed.replace("<username>", username)
+
+    else:
+        message_with_username = message_before_embed
+    
+    return(message_with_username)
+
+def random_color_generator() -> str:
+
+    rgb_list = []
+
+    for index in range(3):
+        color = random.randint(0,255)
+        rgb_list.append(color)
+
+    color_decimal = int(rgb_list[0]) * 65536 + int(rgb_list[1]) * 256 + int(rgb_list[2])
+    color_decimal_string = str(color_decimal)
+
+    return(color_decimal_string)
+
+# webhook send to discord for goinglive message
+def discord_webhook_send(streamer_data: dict ) -> tuple[str ,str, str]:
+    error_count = 0
+    while error_count < max_errors_allowed:
+
+        try:
+
+            color = random_color_generator()
             
+            data_to_send_to_webhook, username = parse_data_for_webhook(streamer_data, color)
+
             send_request_to_discord = requests.post(loaded_config.discord_webhook_url, json=data_to_send_to_webhook, params={'wait': 'true'})
             send_request_to_discord_json = send_request_to_discord.json()
             message_id = send_request_to_discord_json["id"]
@@ -114,58 +136,7 @@ def discord_webhook_edit(streamer_data: dict,message_id: str, embed_color: str):
     while error_count < max_errors_allowed:
         try:
 
-            username = streamer_data["data"][0]["user_name"]
-            user = streamer_data["data"][0]["user_login"]
-            title = streamer_data["data"][0]["title"]
-            game = streamer_data["data"][0]["game_name"]
-            viewers = streamer_data["data"][0]["viewer_count"]
-            started = streamer_data["data"][0]["started_at"]
-            thumbnail = streamer_data["data"][0]["thumbnail_url"]
-
-            if streamer_data["data"][0]["game_name"] == "":
-                game = "none"
-            
-            message_before_embed = loaded_config.message_before_embed
-            if "<username>" in message_before_embed:
-                message_with_username = message_before_embed.replace("<username>", username)
-            else:
-                message_with_username = message_before_embed
-
-            data_to_send_to_webhook = {"content": message_with_username, "embeds": [
-                    {
-                    "title": f":red_circle: {username} is now live!",
-                    "description": title,
-                    "url": f"https://www.twitch.tv/{user}",
-                    "color": embed_color,
-                    "fields": [
-                        {
-                            "name": "Playing:",
-                            "value": game,
-                            "inline": "true"
-                        },
-                        {
-                            "name": "Viewers:",
-                            "value": viewers,
-                            "inline": "true"
-                        },
-                        {
-                            "name": "Twitch:",
-                            "value": f"[Watch stream](https://www.twitch.tv/{user})"
-                        },
-                        {
-                        "name": "",
-                        "value": "[***get this bot***](https://github.com/keyboardmedicNL/Twitchgoinglive)"
-                        }
-                    ],
-                    "timestamp": started,
-                    "image": {
-                        "url": f"https://static-cdn.jtvnw.net/previews-ttv/live_user_{user}-640x360.jpg?cacheBypass={str(random.random())}"
-                    },
-                    "thumbnail": {
-                        "url": thumbnail
-                    },    
-                    }
-                ]}
+            data_to_send_to_webhook, username = parse_data_for_webhook(streamer_data, embed_color)
             
             edit_request_to_discord = requests.patch(f"{loaded_config.discord_webhook_url}/messages/{message_id}", json=data_to_send_to_webhook, params={'wait': 'true'})
             
@@ -193,13 +164,18 @@ def discord_webhook_edit(streamer_data: dict,message_id: str, embed_color: str):
 
 # deletes discord webhook message
 def discord_webhook_delete(message_id: str):
+
     error_count = 0
     while error_count < max_errors_allowed:
+
         try:
+
             delete_request_to_discord = requests.delete(f"{loaded_config.discord_webhook_url}/messages/{message_id}", params={'wait': 'true'})
+            
             if delete_request_to_discord.ok:
                 logging.debug("deleting message om discord with id: %s, response is %s",message_id, delete_request_to_discord)
                 break
+            
             else:
                 error_count = error_count+1
                 remaining_errors = max_errors_allowed-error_count
@@ -225,14 +201,10 @@ def discord_webhook_edit_to_offline(message_id: str ,filename: str, embed_color:
     error_count = 0
     while error_count < max_errors_allowed:
         
-        message_before_embed = loaded_config.message_before_embed
-        if "<username>" in message_before_embed:
-            message_with_username = message_before_embed.replace("<username>", username)
-        else:
-            message_with_username = message_before_embed
+        message_before_embed = parse_username_for_embed(username)
 
         try:
-            data_to_send_to_webhook = {"content": message_with_username, "embeds": [
+            data_to_send_to_webhook = {"content": message_before_embed, "embeds": [
                     {
                     "title": f":x: {filename} has gone offline!",
                     "description": "",
