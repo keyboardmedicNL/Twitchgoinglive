@@ -23,10 +23,8 @@ def get_token_from_twitch_api() -> str:
                     get_token_from_twitch_json = get_token_from_twitch_request.json()
                     token_from_twitch = get_token_from_twitch_json["access_token"]
                     logging.debug("new twitch api auth token recieved")
-                    with open(r'config/token.txt', 'w') as token_file:
-                        token_file.write("%s\n" % token_from_twitch)
 
-                    break
+                    return(token_from_twitch)
 
                 else:
                     error_count = error_count+1
@@ -44,7 +42,7 @@ def get_token_from_twitch_api() -> str:
                     time.sleep(time_before_retry)
         if error_count == max_errors_allowed:
             raise RuntimeError("Unable to request a new twitch api token after trying 3 times.")
-        return(token_from_twitch)
+        
 
 # gets stream information from twitch api
 def get_stream_json_from_twitch(streamer: str, token_from_twitch: str) -> tuple[dict, dict, bool, str, str]:
@@ -88,18 +86,6 @@ def get_stream_json_from_twitch(streamer: str, token_from_twitch: str) -> tuple[
         raise RuntimeError("Unable to get streamer info from twitch after trying 3 times.")
 
     return(get_stream_json_from_twitch_request, get_stream_json_from_twitch_request_json, is_live, stream_category, streamer_name)
-
-#opens file to get auth token
-def read_twitch_api_token_from_file() -> str:
-    if exists(f"config/token.txt"):
-        with open("config/token.txt", 'r') as file_with_twitch_token:
-            token_raw = str(file_with_twitch_token.readline())
-            twitch_api_token = token_raw.strip()
-        logging.debug("Token to use for twitch api loaded")
-    else:
-        twitch_api_token = get_token_from_twitch_api()
-        
-    return(twitch_api_token)
 
 # get list of team member uids
 def get_list_of_team_member_uids(team_name: str, api_token: str) -> list:

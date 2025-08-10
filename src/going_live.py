@@ -28,7 +28,6 @@ save_message_id_to_file = embed_file_handler.save_message_id_to_file
 read_message_id_from_file = embed_file_handler.read_message_id_from_file
 remove_message_id_file = embed_file_handler.remove_message_id_file
 
-read_twitch_api_token_from_file = twitch_api_handler.read_twitch_api_token_from_file
 get_token_from_twitch_api = twitch_api_handler.get_token_from_twitch_api
 get_stream_json_from_twitch = twitch_api_handler.get_stream_json_from_twitch
 get_list_of_team_member_uids = twitch_api_handler.get_list_of_team_member_uids
@@ -113,7 +112,7 @@ def main():
 
     create_embeds_folder()
     # gets list of streamers once to clean up old embeds, ends script if it fails to get list of streamers
-    token_from_twitch = read_twitch_api_token_from_file()
+    token_from_twitch = get_token_from_twitch_api()
     
     logger.info("pulling list of streamers once to clean up old messages")
     
