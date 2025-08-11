@@ -4,6 +4,7 @@ import requests
 import logging
 import requests_error_handler
 import time
+import color_picker
 
 loaded_config = config_loader.load_config()
 
@@ -11,6 +12,7 @@ init_error_handler = requests_error_handler.init_error_handler
 handle_response_not_ok = requests_error_handler.handle_response_not_ok
 handle_request_exception = requests_error_handler.handle_request_exception
 raise_no_more_tries_exception = requests_error_handler.raise_no_more_tries_exception
+pick_random_color = color_picker.pick_random_color
 
 time_before_retry = 60
 max_errors_allowed = 3
@@ -86,19 +88,6 @@ def parse_username_for_embed(username: str) -> str:
     
     return(message_with_username)
 
-def random_color_generator() -> str:
-
-    rgb_list = []
-
-    for index in range(3):
-        color = random.randint(0,255)
-        rgb_list.append(color)
-
-    color_decimal = int(rgb_list[0]) * 65536 + int(rgb_list[1]) * 256 + int(rgb_list[2])
-    color_decimal_string = str(color_decimal)
-
-    return(color_decimal_string)
-
 def discord_webhook_send(streamer_data: dict ) -> tuple[str ,str, str]:
 
     time_before_retry, max_errors_allowed, error_count = init_error_handler()
@@ -107,7 +96,7 @@ def discord_webhook_send(streamer_data: dict ) -> tuple[str ,str, str]:
 
         try:
 
-            color = random_color_generator()
+            color = pick_random_color("decimal")
             
             data_to_send_to_webhook, username = parse_data_for_webhook(streamer_data, color)
 
