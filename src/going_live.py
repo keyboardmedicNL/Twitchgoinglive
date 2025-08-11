@@ -38,9 +38,6 @@ handle_response_not_ok = requests_error_handler.handle_response_not_ok
 handle_request_exception = requests_error_handler.handle_request_exception
 raise_no_more_tries_exception = requests_error_handler.raise_no_more_tries_exception
 
-time_before_retry = 60
-max_errors_allowed = 3
-
 # functions
 
 # gets list of streamers to poll
