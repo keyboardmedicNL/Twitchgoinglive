@@ -16,8 +16,6 @@ import requests_error_handler
 
 # vars
 
-logger = logging.getLogger(__name__)
-
 config = config_loader.load_config
 
 discord_webhook_send = discord_webhook_embeds.discord_webhook_send
@@ -69,7 +67,7 @@ def get_list_of_streamers(token_from_twitch: str, team_name: str) -> list:
 
                     except Exception as e:
                         error_count, remaining_errors = handle_request_exception(error_count)
-                        logger.error('was unable to get list of streamers trough request with exception: %s trying %s more times and waiting for %s seconds', e, remaining_errors, time_before_retry)
+                        logging.error('was unable to get list of streamers trough request with exception: %s trying %s more times and waiting for %s seconds', e, remaining_errors, time_before_retry)
                         if error_count != max_errors_allowed:
                             time.sleep(time_before_retry)
 
@@ -79,7 +77,7 @@ def get_list_of_streamers(token_from_twitch: str, team_name: str) -> list:
     else:
         list_of_streamers = get_list_of_team_member_uids(team_name, token_from_twitch)
 
-    logger.info('list of streamers to poll from: %s', list_of_streamers)
+    logging.info('list of streamers to poll from: %s', list_of_streamers)
 
     return(list_of_streamers)
 
@@ -87,7 +85,7 @@ def get_list_of_streamers(token_from_twitch: str, team_name: str) -> list:
 def create_embeds_folder():
     if not exists("config/embeds"):
         os.makedirs("config/embeds")
-        logger.info('embed folder was not found so it was created')
+        logging.info('embed folder was not found so it was created')
 
 def clean_up_old_embeds(list_of_streamers: list ,use_offline_message: bool):
     for streamer in list_of_streamers:
@@ -98,14 +96,14 @@ def clean_up_old_embeds(list_of_streamers: list ,use_offline_message: bool):
             else:
                 discord_webhook_delete(message_id_from_file)
             remove_message_id_file(streamer)
-    logger.info("cleaned up old embeds posted to webhook")
+    logging.info("cleaned up old embeds posted to webhook")
     for filename in os.listdir("config/embeds"):
         file_path = os.path.join("config/embeds", filename)
         if os.path.isfile(file_path) or os.path.islink(file_path):
             os.unlink(file_path)
         elif os.path.isdir(file_path):
             shutil.rmtree(file_path)
-    logger.info("removed all remaining files in config/embeds/")
+    logging.info("removed all remaining files in config/embeds/")
 
 def main():
     sys.excepthook = housey_logging.log_exception
@@ -118,7 +116,7 @@ def main():
     # gets list of streamers once to clean up old embeds, ends script if it fails to get list of streamers
     token_from_twitch = get_token_from_twitch_api()
     
-    logger.info("pulling list of streamers once to clean up old messages")
+    logging.info("pulling list of streamers once to clean up old messages")
     
     streamers = get_list_of_streamers(token_from_twitch, loaded_config.team_name)
     clean_up_old_embeds(streamers, loaded_config.use_offline_messages)
@@ -144,22 +142,22 @@ def main():
                 if is_live and (stream_category.lower() in loaded_config.allowed_categories or len(loaded_config.allowed_categories)==0):
                     
                     if stream_category.lower() in loaded_config.allowed_categories:
-                        logger.info('%s for %s with name %s is found in allowed categories: %s', stream_category, streamer, streamer_name, loaded_config.allowed_categories)
+                        logging.info('%s for %s with name %s is found in allowed categories: %s', stream_category, streamer, streamer_name, loaded_config.allowed_categories)
                     
                     # updates embed if it allready exsists or creates it if not to discord webhook
                     if exists(f"config/embeds/{streamer}.txt"):
-                        logger.info('embed allready exsists for %s with name %s, updating it',streamer, streamer_name)
+                        logging.info('embed allready exsists for %s with name %s, updating it',streamer, streamer_name)
                         message_id_from_file, name_from_file, embed_color, _ = read_message_id_from_file(streamer)
                         discord_webhook_edit(get_stream_json_from_twitch_data, message_id_from_file, embed_color)
                     else:
-                        logger.info('no embed exsists for %s with name %s, creating it',streamer, streamer_name)
+                        logging.info('no embed exsists for %s with name %s, creating it',streamer, streamer_name)
                         message_id, embed_color, streamer_user_name = discord_webhook_send(get_stream_json_from_twitch_data)
                         save_message_id_to_file(streamer, message_id, streamer_name, embed_color, streamer_user_name)
                 
                 else:
                     # removes embed if offline or uses offline message
                     if exists(f"config/embeds/{streamer}.txt"):
-                        logger.info('%s with name %s is no longer live',streamer, streamer_name)
+                        logging.info('%s with name %s is no longer live',streamer, streamer_name)
                         message_id_from_file, name_from_file, embed_color, username_from_file = read_message_id_from_file(streamer)
                         
                         if loaded_config.use_offline_messages:
@@ -168,7 +166,7 @@ def main():
                             discord_webhook_delete(message_id_from_file)
                         remove_message_id_file(streamer)
         
-        logger.info('finished main loop, waiting for %s minutes',loaded_config.poll_interval)
+        logging.info('finished main loop, waiting for %s minutes',loaded_config.poll_interval)
         time.sleep(poll_interval_minutes)
 
 if __name__ == "__main__":
