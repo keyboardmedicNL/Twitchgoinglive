@@ -96,7 +96,7 @@ def discord_webhook_send(streamer_data: dict ) -> tuple[str ,str, str]:
 
         try:
 
-            color = pick_random_color("decimal")
+            color = str(pick_random_color("decimal"))
             
             data_to_send_to_webhook, username = parse_data_for_webhook(streamer_data, color)
 
