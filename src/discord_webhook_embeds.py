@@ -19,7 +19,16 @@ max_errors_allowed = 3
 
 def parse_data_for_webhook(streamer_data: dict, color: str) -> tuple[dict, str]:
 
-    username, user, title, game, viewers, started, thumbnail = parse_streamer_data(streamer_data)
+    username = streamer_data["data"][0]["user_name"]
+    user = streamer_data["data"][0]["user_login"]
+    title = streamer_data["data"][0]["title"]
+    game = streamer_data["data"][0]["game_name"]
+    viewers = streamer_data["data"][0]["viewer_count"]
+    started = streamer_data["data"][0]["started_at"]
+    thumbnail = streamer_data["data"][0]["thumbnail_url"]
+
+    if streamer_data["data"][0]["game_name"] == "":
+        game = "none"
 
     message_before_embed = parse_username_for_embed(username)
 
@@ -60,21 +69,6 @@ def parse_data_for_webhook(streamer_data: dict, color: str) -> tuple[dict, str]:
                 ]}
     
     return(data_to_send_to_webhook, username)
-
-def parse_streamer_data(streamer_data: dict) -> tuple[str, str, str, str, str, str, str]:
-    
-    username = streamer_data["data"][0]["user_name"]
-    user = streamer_data["data"][0]["user_login"]
-    title = streamer_data["data"][0]["title"]
-    game = streamer_data["data"][0]["game_name"]
-    viewers = streamer_data["data"][0]["viewer_count"]
-    started = streamer_data["data"][0]["started_at"]
-    thumbnail = streamer_data["data"][0]["thumbnail_url"]
-
-    if streamer_data["data"][0]["game_name"] == "":
-        game = "none"
-
-    return(username, user, title, game, viewers, started, thumbnail)
 
 def parse_username_for_embed(username: str) -> str:
 
