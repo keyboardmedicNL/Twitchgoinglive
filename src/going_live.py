@@ -14,8 +14,6 @@ import twitch_api_handler
 import sys
 import requests_error_handler
 
-
-
 # vars
 
 logger = logging.getLogger(__name__)

@@ -1,2 +1,2 @@
 - add docstrings to functions
-- make docker container crash when exception is raised
+- add hash to color function
