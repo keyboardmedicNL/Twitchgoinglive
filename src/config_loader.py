@@ -11,6 +11,11 @@ default_config = {
     "use_offline_messages":False,
     "team_name": "",
     "excluded_uids":[],
+    "use_skybass": False,
+    "names_to_ignore": [{
+        "name":"name",
+        "replace_with":"nothing"
+        }]
 }
 
 # loads config from file

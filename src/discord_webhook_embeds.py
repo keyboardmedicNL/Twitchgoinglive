@@ -5,6 +5,7 @@ import logging
 import requests_error_handler
 import time
 import color_picker
+import sky_bass_functions
 
 loaded_config = config_loader.load_config()
 
@@ -13,6 +14,8 @@ handle_response_not_ok = requests_error_handler.handle_response_not_ok
 handle_request_exception = requests_error_handler.handle_request_exception
 raise_no_more_tries_exception = requests_error_handler.raise_no_more_tries_exception
 pick_random_color = color_picker.pick_random_color
+
+sanitize_username = sky_bass_functions.sanitize_streamer_username
 
 time_before_retry = 60
 max_errors_allowed = 3
@@ -29,6 +32,9 @@ def parse_data_for_webhook(streamer_data: dict, color: str) -> tuple[dict, str]:
 
     if streamer_data["data"][0]["game_name"] == "":
         game = "none"
+
+    if loaded_config.use_skybass:
+        username = sanitize_username(username, loaded_config.names_to_ignore)
 
     message_before_embed = parse_username_for_embed(username)
 

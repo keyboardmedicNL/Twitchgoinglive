@@ -14,3 +14,11 @@ discord_webhook_url: YOUR_WEBHOOK_URL # webhook url from discord to post going l
 #excluded_uids: # list of uids to exclude from the bot, usefull if you poll an entire team and want to leave out certain members of team
 # - 123456
 # - 234567
+
+# sky bass functions: a set of slightly obscure entries used in slightly obscure functions for use on the sky bass discord
+#use_skybass: true # enables use of functions specificly written for the sky bass discord
+#names_to_ignore: # list of dicts of usernames to ignore for filtering by sky bass functions that remove dnb, dj, vox or music from the username for embed message
+#- name: "ApocDnB"
+#  replace_with: "Zach and Apoc"
+#- name: "dj_Acidion"
+#  replace_with: "Acidman"
