@@ -1,7 +1,9 @@
-import requests
 import config_loader
 import twitch_api_handler
 import time
+import twitch_api_handler
+
+get_streamer_info = twitch_api_handler.get_streamer_info
 
 #functions
 def check_if_id_allready_in_streamers_file(user_id: str,) -> bool:
@@ -32,28 +34,26 @@ def main():
         save_choice = ""
         print("please input the user name you would like to get the id for: ")
         user_name = input()
-        response=requests.get(f"https://api.twitch.tv/helix/users?login={user_name.lower()}", headers={'Authorization':f"Bearer {token}", 'Client-Id':str(loaded_config.twitch_api_id)})
-        if response.ok:
-        
-            responsejson = response.json()
-            user_id = responsejson["data"][0]["id"]
-            print(f"the user id for {user_name} = {user_id}")
 
-            print("would you like to save the id to your streamers.txt? (Y) or n ")
-            save_choice = input() 
+        response = get_streamer_info(user_name, token)
 
-            if save_choice.lower() == "y" or save_choice == "":
-                if not check_if_id_allready_in_streamers_file(user_id):
-                    with open(f"config/streamers.txt", 'a') as streamers_file:
-                        streamers_file.write(f"\n{user_id}")
-                    print(f"added new line to streamers.txt: {user_id}")
-                else:
-                    print(f"{user_id} allready exsists in streamers.txt. skipping save...")
-                print("------")
+        responsejson = response.json()
+        user_id = responsejson["data"][0]["id"]
+        print(f"the user id for {user_name} = {user_id}")
+
+        print("would you like to save the id to your streamers.txt? (Y) or n ")
+        save_choice = input() 
+
+        if save_choice.lower() == "y" or save_choice == "":
+            if not check_if_id_allready_in_streamers_file(user_id):
+                with open(f"config/streamers.txt", 'a') as streamers_file:
+                    streamers_file.write(f"\n{user_id}")
+                print(f"added new line to streamers.txt: {user_id}")
             else:
-                print("------")
+                print(f"{user_id} allready exsists in streamers.txt. skipping save...")
+            print("------")
         else:
-            print(f"response for get users from twitch is {response}")
+            print("------")
 
 if __name__ == "__main__":
     main()

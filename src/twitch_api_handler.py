@@ -87,5 +87,8 @@ def get_stream_json_from_twitch(streamer: str, token_from_twitch: str) -> tuple[
 
     return(get_stream_json_from_twitch_response, get_stream_json_from_twitch_request_json, is_live, stream_category, streamer_name)
 
+def get_streamer_info(streamer: str, token_from_twitch: str):
 
+    get_streamer_info_response = handle_request_error(request_url= f"https://api.twitch.tv/helix/users?login={streamer.lower()}", request_headers= {'Authorization':f"Bearer {token_from_twitch}", 'Client-Id':str(loaded_config.twitch_api_id)})
     
+    return get_streamer_info_response
