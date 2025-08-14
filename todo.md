@@ -1,2 +1,1 @@
 - add hash to color function
-- fix clean_up_old_embeds to not need streamers anymore

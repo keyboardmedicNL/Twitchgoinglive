@@ -20,6 +20,7 @@ a simple script that polls a list of twitch channels and posts a message to a di
 
 ```
 # REQUIRED PARAMETERS
+# REQUIRED PARAMETERS
 twitch_api_id: YOUR_API_ID # your twitch api id
 twitch_api_secret: YOUR_API_SECRET # your twitch api secret
 discord_webhook_url: YOUR_WEBHOOK_URL # webhook url from discord to post going live messages to
@@ -29,12 +30,20 @@ discord_webhook_url: YOUR_WEBHOOK_URL # webhook url from discord to post going l
 #allowed_categories: # a list of allowed categories your streamers need to be in for the bot to show a going live message DEFAULT all categories allowed
 #- djs
 #- music
-#message_before_embed: this is a message that shows above the embed # a custom message to show above the going live embed message, can be used to ping roles or users DEFAULT ""
+#message_before_embed: this is a message that shows above the embed # a custom message to show above the going live embed message, add <username> in the string to add the streamers name to the message. Can be used to ping roles or users DEFAULT ""
 #use_offline_messages: false # wether or not the bot should delete the message when someone goes offline or should display an offline message instead DEFAULT false
 #team_name: YOUR_TEAM_NAME # add the name of a twitch team to use the list of members in a twitch team to check instead of streamers.txt
 #excluded_uids: # list of uids to exclude from the bot, usefull if you poll an entire team and want to leave out certain members of team
 # - 123456
 # - 234567
+
+# sky bass functions: a set of slightly obscure entries used in slightly obscure functions for use on the sky bass discord
+#use_skybass: true # enables use of functions specificly written for the sky bass discord
+#names_to_ignore: # list of dicts of usernames to ignore for filtering by sky bass functions that remove dnb, dj, vox or music from the username for embed message
+#- name: "ApocDnB"
+#  replace_with: "Zach and Apoc"
+#- name: "dj_Acidion"
+#  replace_with: "Acidman"
 ```
 
 5. create a streamers.txt file in the config folder and add the user id of every streamer you want to poll on a new line, alternativly add a url to a txt file that contains the list to poll (if you dont have the user id you can use https://www.streamweasels.com/tools/convert-twitch-username-to-user-id/ to get the id from the twitch api, alternativly there is a included getuserid.py script you can run in a terminal to get it yourself from the api)
@@ -58,7 +67,7 @@ docker exec -it twitchgoinglive sh
 ```
 and then you excecute the script with the command   
 ```
-python src/getuserid.py
+python src/get_user_id.py
 ```
 to exit out of the shell press crtl+p followed by ctrl+q to escape from the shell   
 
