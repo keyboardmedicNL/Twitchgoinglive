@@ -3,7 +3,6 @@ housey_logging.configure()
 
 import logging
 import time
-import requests
 from os.path import exists
 import os
 import config_loader
@@ -12,8 +11,6 @@ import embed_file_handler
 import twitch_api_handler
 import sys
 import requests_error_handler
-
-# vars
 
 config = config_loader.load_config
 
@@ -31,14 +28,8 @@ get_stream_json_from_twitch = twitch_api_handler.get_stream_json_from_twitch
 get_list_of_team_member_uids = twitch_api_handler.get_list_of_team_member_uids
 validate_token = twitch_api_handler.validate_token
 
-init_error_handler = requests_error_handler.init_error_handler
-handle_response_not_ok = requests_error_handler.handle_response_not_ok
-handle_request_exception = requests_error_handler.handle_request_exception
-raise_no_more_tries_exception = requests_error_handler.raise_no_more_tries_exception
+handle_request_error = requests_error_handler.handle_request_error
 
-# functions
-
-# gets list of streamers to poll
 def get_list_of_streamers(token_from_twitch: str, team_name: str) -> list:
 
     if team_name == "":
@@ -46,34 +37,11 @@ def get_list_of_streamers(token_from_twitch: str, team_name: str) -> list:
         # gets list of streamers from streamers.txt
         with open("config/streamers.txt", 'r') as file_with_streamer_ids:
             list_of_streamers = [line.rstrip() for line in file_with_streamer_ids]
+
             if "http" in list_of_streamers[0]:
-
-                time_before_retry, max_errors_allowed, error_count = init_error_handler()
-
-                while error_count < max_errors_allowed:
-
-                    try:
-                        get_streamers_trough_request_response = requests.get(list_of_streamers[0])
-
-                        if get_streamers_trough_request_response.ok:
-                            list_of_streamers = get_streamers_trough_request_response.text.splitlines()
-                            break
-
-                        else:
-                            error_count, remaining_errors = handle_response_not_ok(error_count)
-                            logging.error('was unable to get list of streamers trough request with response: %s with exception: %s trying %s more times and waiting for %s seconds', get_streamers_trough_request_response, remaining_errors, time_before_retry)
-                            if error_count != max_errors_allowed:
-                                time.sleep(time_before_retry)
-
-                    except Exception as e:
-                        error_count, remaining_errors = handle_request_exception(error_count)
-                        logging.error('was unable to get list of streamers trough request with exception: %s trying %s more times and waiting for %s seconds', e, remaining_errors, time_before_retry)
-                        if error_count != max_errors_allowed:
-                            time.sleep(time_before_retry)
-
-                if error_count == max_errors_allowed:
-                    raise_no_more_tries_exception(max_errors_allowed)
-                
+                get_streamers_trough_request_response = handle_request_error(request_url= list_of_streamers[0])
+                list_of_streamers = get_streamers_trough_request_response.text.splitlines()
+     
     else:
         list_of_streamers = get_list_of_team_member_uids(team_name, token_from_twitch)
 

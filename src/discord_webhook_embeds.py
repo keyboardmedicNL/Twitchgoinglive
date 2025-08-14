@@ -1,24 +1,17 @@
 import config_loader
 import random
-import requests
 import logging
 import requests_error_handler
-import time
 import color_picker
 import sky_bass_functions
 
 loaded_config = config_loader.load_config()
 
-init_error_handler = requests_error_handler.init_error_handler
-handle_response_not_ok = requests_error_handler.handle_response_not_ok
-handle_request_exception = requests_error_handler.handle_request_exception
-raise_no_more_tries_exception = requests_error_handler.raise_no_more_tries_exception
+handle_request_error = requests_error_handler.handle_request_error
+
 pick_random_color = color_picker.pick_random_color
 
 sanitize_username = sky_bass_functions.sanitize_streamer_username
-
-time_before_retry = 60
-max_errors_allowed = 3
 
 def parse_data_for_webhook(streamer_data: dict, color: str) -> tuple[dict, str]:
 
@@ -90,138 +83,52 @@ def parse_username_for_embed(username: str) -> str:
 
 def discord_webhook_send(streamer_data: dict ) -> tuple[str ,str, str]:
 
-    time_before_retry, max_errors_allowed, error_count = init_error_handler()
+    color = str(pick_random_color("decimal"))
+    
+    data_to_send_to_webhook, username = parse_data_for_webhook(streamer_data, color)
 
-    while error_count < max_errors_allowed:
+    send_request_to_discord = handle_request_error(request_type= "post", request_url= loaded_config.discord_webhook_url, request_json= data_to_send_to_webhook, request_params= {'wait': 'true'})
 
-        try:
+    send_request_to_discord_json = send_request_to_discord.json()
+    message_id = send_request_to_discord_json["id"]
 
-            color = str(pick_random_color("decimal"))
-            
-            data_to_send_to_webhook, username = parse_data_for_webhook(streamer_data, color)
+    logging.debug("posting message to discord with id: %s for user %s, response is %s",message_id, username, send_request_to_discord)
 
-            send_request_to_discord = requests.post(loaded_config.discord_webhook_url, json=data_to_send_to_webhook, params={'wait': 'true'})
-            send_request_to_discord_json = send_request_to_discord.json()
-            message_id = send_request_to_discord_json["id"]
-
-            if send_request_to_discord.ok:
-                logging.debug("posting message to discord with id: %s for user %s, response is %s",message_id, username, send_request_to_discord)
-                return(message_id, color, username)
-            
-            else:
-                error_count, remaining_errors = handle_response_not_ok(error_count)
-                logging.error("tried posting message to discord with id: %s for user %s, response is %s trying %s more times and waiting for %s seconds",message_id, username, send_request_to_discord, remaining_errors , time_before_retry)
-                if error_count != max_errors_allowed:
-                    time.sleep(time_before_retry)
-
-        except Exception as e:
-                error_count, remaining_errors = handle_request_exception(error_count)
-                logging.error("attempted to post message to discord with exception: %s trying %s more times and waiting for %s seconds", e, remaining_errors, time_before_retry)
-                if error_count != max_errors_allowed:
-                    time.sleep(time_before_retry)
-                                
-    if error_count == max_errors_allowed:
-        raise_no_more_tries_exception(max_errors_allowed)
+    return(message_id, color, username)
     
 def discord_webhook_edit(streamer_data: dict,message_id: str, embed_color: str):
 
-    time_before_retry, max_errors_allowed, error_count = init_error_handler()
-
-    while error_count < max_errors_allowed:
-        try:
-
-            data_to_send_to_webhook, username = parse_data_for_webhook(streamer_data, embed_color)
-            
-            edit_request_to_discord = requests.patch(f"{loaded_config.discord_webhook_url}/messages/{message_id}", json=data_to_send_to_webhook, params={'wait': 'true'})
-            
-            if edit_request_to_discord.ok:
-                logging.debug("updating message to discord with id: %s for user %s, response is %s",message_id, username, edit_request_to_discord)
-                break
-            else:
-                error_count, remaining_errors = handle_response_not_ok(error_count)
-                logging.error("tried updating message to discord with id: %s for user %s, response is %s trying %s more times and waiting for %s seconds",message_id, username, edit_request_to_discord, remaining_errors,  time_before_retry)
-                if error_count != max_errors_allowed:
-                    time.sleep(time_before_retry)
-
-        except Exception as e:
-            error_count, remaining_errors = handle_request_exception(error_count)
-            logging.error("attempted to update message to discord with exception: %e trying %s more times and waiting for %s seconds", e, remaining_errors,  time_before_retry)
-            if error_count != max_errors_allowed:
-                time.sleep(time_before_retry)
-
-    if error_count == max_errors_allowed:
-        raise_no_more_tries_exception(max_errors_allowed)
+    data_to_send_to_webhook, username = parse_data_for_webhook(streamer_data, embed_color)
+    
+    edit_request_to_discord = handle_request_error(request_type="patch", request_url= f"{loaded_config.discord_webhook_url}/messages/{message_id}", request_json= data_to_send_to_webhook, request_params= {'wait': 'true'})
+    
+    logging.debug("updating message to discord with id: %s for user %s, response is %s",message_id, username, edit_request_to_discord)
 
 def discord_webhook_delete(message_id: str):
 
-    time_before_retry, max_errors_allowed, error_count = init_error_handler()
-
-    while error_count < max_errors_allowed:
-
-        try:
-
-            delete_request_to_discord = requests.delete(f"{loaded_config.discord_webhook_url}/messages/{message_id}", params={'wait': 'true'})
-            
-            if delete_request_to_discord.ok:
-                logging.debug("deleting message om discord with id: %s, response is %s",message_id, delete_request_to_discord)
-                break
-            
-            else:
-                error_count, remaining_errors = handle_response_not_ok(error_count)
-                logging.error("tried deleting message om discord with id: %s, response is %s trying %s more times and waiting for %s seconds",message_id, delete_request_to_discord, remaining_errors, time_before_retry)
-                if error_count != max_errors_allowed:
-                    time.sleep(time_before_retry)
-
-        except Exception as e:
-            error_count, remaining_errors = handle_request_exception(error_count)
-            logging.error("attempted to delete message on discord with exception: %s trying %s more times and waiting for %s seconds", e, remaining_errors, time_before_retry)
-            if error_count != max_errors_allowed:
-                time.sleep(time_before_retry)
-
-    if error_count == max_errors_allowed:
-        raise_no_more_tries_exception(max_errors_allowed)
+    delete_request_to_discord = handle_request_error(status_type_ok=[204] ,request_type="delete", request_url= f"{loaded_config.discord_webhook_url}/messages/{message_id}", request_params= {'wait': 'true'})
+    
+    logging.debug("deleting message om discord with id: %s, response is %s",message_id, delete_request_to_discord)
 
 def discord_webhook_edit_to_offline(message_id: str ,filename: str, embed_color: str, username: str):
 
-    time_before_retry, max_errors_allowed, error_count = init_error_handler()
+    message_before_embed = parse_username_for_embed(username)
 
-    while error_count < max_errors_allowed:
-        
-        message_before_embed = parse_username_for_embed(username)
+    data_to_send_to_webhook = {"content": message_before_embed, "embeds": [
+            {
+            "title": f":x: {filename} has gone offline!",
+            "description": "",
+            "url": f"https://www.twitch.tv/{filename.lower()}",
+            "color": embed_color,
+            "fields": [
+                {
+                "name": "",
+                "value": "[***get this bot***](https://github.com/keyboardmedicNL/Twitchgoinglive)"
+                }
+            ],
+            }
+        ]}
+    
+    edit_to_offline_request_to_discord = handle_request_error(request_type="patch", request_url= f"{loaded_config.discord_webhook_url}/messages/{message_id}", request_json= data_to_send_to_webhook, request_params= {'wait': 'true'})
 
-        try:
-            data_to_send_to_webhook = {"content": message_before_embed, "embeds": [
-                    {
-                    "title": f":x: {filename} has gone offline!",
-                    "description": "",
-                    "url": f"https://www.twitch.tv/{filename.lower()}",
-                    "color": embed_color,
-                    "fields": [
-                        {
-                        "name": "",
-                        "value": "[***get this bot***](https://github.com/keyboardmedicNL/Twitchgoinglive)"
-                        }
-                    ],
-                    }
-                ]}
-            
-            edit_to_offline_request_to_discord = requests.patch(f"{loaded_config.discord_webhook_url}/messages/{message_id}", json=data_to_send_to_webhook, params={'wait': 'true'})
-
-            if edit_to_offline_request_to_discord.ok:
-                logging.debug("updating to offline message to discord with id: %s for %s, response is %s",message_id, filename, edit_to_offline_request_to_discord)
-                break
-
-            else:
-                error_count, remaining_errors = handle_response_not_ok(error_count)
-                logging.error("tried updating to offline message to discord with id: %s for %s, response is %s trying %s more times and waiting for %s seconds",message_id, filename, edit_to_offline_request_to_discord, remaining_errors, time_before_retry)    
-                if error_count != max_errors_allowed:
-                    time.sleep(time_before_retry)
-
-        except Exception as e:
-            error_count, remaining_errors = handle_request_exception(error_count)
-            logging.error("attempted to update offline message to discord with exception %e trying %s more times and waiting for %s seconds", e, remaining_errors, time_before_retry)
-            if error_count != max_errors_allowed:
-                time.sleep(time_before_retry)
-
-    if error_count == max_errors_allowed:
-        raise_no_more_tries_exception(max_errors_allowed)
+    logging.debug("updating to offline message to discord with id: %s for %s, response is %s",message_id, filename, edit_to_offline_request_to_discord)
