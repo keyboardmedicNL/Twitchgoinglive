@@ -48,6 +48,42 @@ def get_token_from_twitch_api() -> str:
         if error_count == max_errors_allowed:
             raise_no_more_tries_exception(max_errors_allowed)
 
+def validate_token(token_from_twitch: str) -> tuple[str]:
+
+    time_before_retry, max_errors_allowed, error_count = init_error_handler()
+
+    while error_count < max_errors_allowed:
+
+        try:
+
+            validate_token_response=requests.get(f"https://id.twitch.tv/oauth2/validate", headers={'Authorization':f"Bearer {token_from_twitch}"})
+
+            if validate_token_response.ok:
+                logging.debug("validated twitch api token and came back as valid")
+                
+                return(token_from_twitch)
+            
+            elif validate_token_response.status_code == 401:
+                logging.debug("validated twitch api token and came back as invalid")
+                token_from_twitch = get_token_from_twitch_api()
+
+                return(token_from_twitch)
+            
+            else:
+                error_count, remaining_errors = handle_response_not_ok(error_count)
+                logging.error("tried to validate twitch api token with response: %s trying %s more times and waiting for %s seconds", validate_token_response, remaining_errors, time_before_retry)
+                if error_count != max_errors_allowed:
+                    time.sleep(time_before_retry)
+
+        except Exception as e:
+            error_count, remaining_errors = handle_request_exception(error_count)
+            logging.error("tried to validate twitch api token with exception: %s trying %s more times and waiting for %s seconds", e, remaining_errors , time_before_retry)
+            if error_count != max_errors_allowed:
+                time.sleep(time_before_retry)
+
+    if error_count == max_errors_allowed:
+         raise_no_more_tries_exception(max_errors_allowed)
+
 # gets stream information from twitch api
 def get_stream_json_from_twitch(streamer: str, token_from_twitch: str) -> tuple[dict, dict, bool, str, str]:
 

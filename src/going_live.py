@@ -29,6 +29,7 @@ remove_message_id_file = embed_file_handler.remove_message_id_file
 get_token_from_twitch_api = twitch_api_handler.get_token_from_twitch_api
 get_stream_json_from_twitch = twitch_api_handler.get_stream_json_from_twitch
 get_list_of_team_member_uids = twitch_api_handler.get_list_of_team_member_uids
+validate_token = twitch_api_handler.validate_token
 
 init_error_handler = requests_error_handler.init_error_handler
 handle_response_not_ok = requests_error_handler.handle_response_not_ok
@@ -117,6 +118,8 @@ def main():
 
     # main loop
     while True:
+        
+        token_from_twitch = validate_token(token_from_twitch)
 
         streamers = get_list_of_streamers(token_from_twitch, loaded_config.team_name)
 
