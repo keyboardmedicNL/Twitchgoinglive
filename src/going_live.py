@@ -6,7 +6,6 @@ import time
 import requests
 from os.path import exists
 import os
-import shutil
 import config_loader
 import discord_webhook_embeds
 import embed_file_handler
