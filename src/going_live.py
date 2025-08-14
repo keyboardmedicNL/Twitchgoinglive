@@ -87,23 +87,20 @@ def create_embeds_folder():
         os.makedirs("config/embeds")
         logging.info('embed folder was not found so it was created')
 
-def clean_up_old_embeds(list_of_streamers: list ,use_offline_message: bool):
-    for streamer in list_of_streamers:
-        if exists(f"config/embeds/{streamer}.txt"):
-            message_id_from_file,name_from_file, embed_color, username_from_file = read_message_id_from_file(streamer)
-            if use_offline_message:
-                discord_webhook_edit_to_offline(message_id_from_file, name_from_file, embed_color, username_from_file)
-            else:
-                discord_webhook_delete(message_id_from_file)
-            remove_message_id_file(streamer)
-    logging.info("cleaned up old embeds posted to webhook")
+def clean_up_old_embeds(use_offline_message: bool):
     for filename in os.listdir("config/embeds"):
-        file_path = os.path.join("config/embeds", filename)
-        if os.path.isfile(file_path) or os.path.islink(file_path):
-            os.unlink(file_path)
-        elif os.path.isdir(file_path):
-            shutil.rmtree(file_path)
-    logging.info("removed all remaining files in config/embeds/")
+
+        filename = filename.replace(".txt","")
+        message_id_from_file,name_from_file, embed_color, username_from_file = read_message_id_from_file(filename)
+
+        if use_offline_message:
+            discord_webhook_edit_to_offline(message_id_from_file, name_from_file, embed_color, username_from_file)
+        else:
+            discord_webhook_delete(message_id_from_file)
+
+        remove_message_id_file(filename)
+
+    logging.info("cleaned up old embeds posted to webhook")
 
 def main():
     
@@ -114,13 +111,10 @@ def main():
     poll_interval_minutes = loaded_config.poll_interval*60
 
     create_embeds_folder()
-    # gets list of streamers once to clean up old embeds, ends script if it fails to get list of streamers
+    
+    clean_up_old_embeds( loaded_config.use_offline_messages)
+
     token_from_twitch = get_token_from_twitch_api()
-    
-    logging.info("pulling list of streamers once to clean up old messages")
-    
-    streamers = get_list_of_streamers(token_from_twitch, loaded_config.team_name)
-    clean_up_old_embeds(streamers, loaded_config.use_offline_messages)
 
     # main loop
     while True:
