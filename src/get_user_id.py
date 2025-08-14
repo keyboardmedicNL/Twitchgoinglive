@@ -1,4 +1,3 @@
-import config_loader
 import twitch_api_handler
 import time
 import twitch_api_handler
@@ -20,7 +19,6 @@ def check_if_id_allready_in_streamers_file(user_id: str,) -> bool:
     return(allready_in_file)
 
 def main():
-    loaded_config = config_loader.load_config()
 
     print ("Get twitch user id script by keyboardmedic:")
     time.sleep(1)
