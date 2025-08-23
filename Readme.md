@@ -72,4 +72,6 @@ python src/get_user_id.py
 to exit out of the shell press crtl+p followed by ctrl+q to escape from the shell   
 
 # disclaimer
-these scripts are written by an amateur... use at your own risk
+Scripts are written by an amateur, use at your own risk
+
+the only vibe used in this code is background drum and bass
