@@ -15,7 +15,7 @@ default_config = {
     "names_to_ignore": [{
         "name":"name",
         "replace_with":"nothing"
-        }]
+        }],
     "time_before_retry":60,
     "max_errors_allowed":3
 }
