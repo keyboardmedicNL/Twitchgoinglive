@@ -8,7 +8,7 @@ handle_request_error = requests_error_handler.handle_request_error
 
 def get_token_from_twitch_api() -> str:
 
-    logging.info("Requesting new api auth token from twitch")
+    logging.debug("Requesting new api auth token from twitch")
 
     get_token_from_twitch_response = handle_request_error(request_type="post",request_url="https://id.twitch.tv/oauth2/token", request_json={"client_id" : str(loaded_config.twitch_api_id), "client_secret" : str(loaded_config.twitch_api_secret), "grant_type":"client_credentials"})
     
@@ -35,7 +35,7 @@ def validate_token(token_from_twitch: str) -> str:
 
 def get_list_of_team_member_uids(team_name: str, api_token: str) -> list:
 
-    logging.info("getting team data from twitch api for team %s", team_name)
+    logging.debug("getting team data from twitch api for team %s", team_name)
 
     get_team_data_response = handle_request_error(request_type="get",request_url=f"https://api.twitch.tv/helix/teams?name={team_name}", request_headers={'Authorization':f"Bearer {api_token}", 'Client-Id':loaded_config.twitch_api_id})
 
@@ -53,7 +53,7 @@ def get_list_of_clips(streamer_id: str, api_token: str, time_last_checked: str) 
 
     list_of_new_clips = []
 
-    logging.info("getting list of clips from twitch api for streamer %s", streamer_id)
+    logging.debug("getting list of clips from twitch api for streamer %s", streamer_id)
 
     get_clips_response = handle_request_error(request_type="get",request_url=f"https://api.twitch.tv/helix/clips?broadcaster_id={streamer_id}&started_at={time_last_checked}", request_headers={'Authorization':f"Bearer {api_token}", 'Client-Id':loaded_config.twitch_api_id})
 
@@ -78,7 +78,7 @@ def get_stream_json_from_twitch(streamer: str, token_from_twitch: str) -> tuple[
             stream_category = get_stream_json_from_twitch_request_json["data"][0]["game_name"]
             streamer_name = get_stream_json_from_twitch_request_json["data"][0]["user_name"]
 
-            logging.info("%s with name %s is live and in category %s",streamer, streamer_name, stream_category)
+            logging.debug("%s with name %s is live and in category %s",streamer, streamer_name, stream_category)
         
     except:
         is_live = False
