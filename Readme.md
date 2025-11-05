@@ -36,6 +36,8 @@ discord_webhook_url: YOUR_WEBHOOK_URL # webhook url from discord to post going l
 #excluded_uids: # list of uids to exclude from the bot, usefull if you poll an entire team and want to leave out certain members of team
 # - 123456
 # - 234567
+#max_errors_allowed: 3 # the amount of times the bot will retry a http request when it runs into an error performing it
+#time_before_retry: 60 # time in seconds between retry attempts for errored out http requests
 
 # sky bass functions: a set of slightly obscure entries used in slightly obscure functions for use on the sky bass discord
 #use_skybass: true # enables use of functions specificly written for the sky bass discord
