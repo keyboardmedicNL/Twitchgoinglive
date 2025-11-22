@@ -73,6 +73,7 @@ def clean_up_old_embeds(use_offline_message: bool):
 def main():
     
     logging.info ("starting twitchgoinglive")
+    logging.info ("Only errors will be displayed unless otherwise configured")
     
     sys.excepthook = housey_logging.log_exception
 

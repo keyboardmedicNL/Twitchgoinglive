@@ -38,6 +38,7 @@ discord_webhook_url: YOUR_WEBHOOK_URL # webhook url from discord to post going l
 # - 234567
 #max_errors_allowed: 3 # the amount of times the bot will retry a http request when it runs into an error performing it
 #time_before_retry: 60 # time in seconds between retry attempts for errored out http requests
+#allow_failure: true or false # allows manual deletion of messages without causing an exception unless use_offline_messages is also used, Leaving this off will provide better error handling
 
 # sky bass functions: a set of slightly obscure entries used in slightly obscure functions for use on the sky bass discord
 #use_skybass: true # enables use of functions specificly written for the sky bass discord
@@ -79,6 +80,10 @@ to exit out of the shell press crtl+p followed by ctrl+q to escape from the shel
 The bot expects to be able to manipulate the messages it created, if they no longer exsist the bot will try to change or delete the message a set amount of times and then crash.
 
 To fix: go to your bots config folder and delete all files in config/embeds, delete all exsisting messages in discord and restart the bot
+
+OR
+
+Use the config entry: allow_failure: true to allow manual message deletion without causing errors
 
 ### if i put @everyone into the message_before_embed entry in the config the bot crashes
 @ is used by yaml for other things, enclose the message in qoutes or double qoutes to fix

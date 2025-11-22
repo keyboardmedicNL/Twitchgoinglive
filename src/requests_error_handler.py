@@ -7,7 +7,6 @@ loaded_config = config_loader.load_config()
 time_before_retry = loaded_config.time_before_retry
 max_errors_allowed = loaded_config.max_errors_allowed
 
-error_count = 0
 
 def error_counter(error_count: int) -> tuple[int, int]:
     error_count = error_count+1
@@ -17,8 +16,6 @@ def error_counter(error_count: int) -> tuple[int, int]:
 
 def handle_request_error(request_type: str="get", request_url: str=None, request_data: any=None, request_json: any=None, request_params: any=None, request_headers: any=None, status_type_ok: list=[200] ) -> object:
     
-    time_before_retry = 60
-    max_errors_allowed = 3
     error_count = 0
 
     while error_count < max_errors_allowed:

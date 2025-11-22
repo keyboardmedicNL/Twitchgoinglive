@@ -100,13 +100,23 @@ def discord_webhook_edit(streamer_data: dict,message_id: str, embed_color: str):
 
     data_to_send_to_webhook, username = parse_data_for_webhook(streamer_data, embed_color)
     
-    edit_request_to_discord = handle_request_error(request_type="patch", request_url= f"{loaded_config.discord_webhook_url}/messages/{message_id}", request_json= data_to_send_to_webhook, request_params= {'wait': 'true'})
+    if loaded_config.allow_failure:
+        status_types_to_pass = [200,404]
+    else:
+        status_types_to_pass = [200]
+
+    edit_request_to_discord = handle_request_error(status_type_ok=status_types_to_pass, request_type="patch", request_url= f"{loaded_config.discord_webhook_url}/messages/{message_id}", request_json= data_to_send_to_webhook, request_params= {'wait': 'true'})
     
     logging.debug("updating message to discord with id: %s for user %s, response is %s",message_id, username, edit_request_to_discord)
 
 def discord_webhook_delete(message_id: str):
 
-    delete_request_to_discord = handle_request_error(status_type_ok=[204] ,request_type="delete", request_url= f"{loaded_config.discord_webhook_url}/messages/{message_id}", request_params= {'wait': 'true'})
+    if loaded_config.allow_failure:
+        status_types_to_pass = [204,404]
+    else:
+        status_types_to_pass = [204]
+
+    delete_request_to_discord = handle_request_error(status_type_ok=status_types_to_pass ,request_type="delete", request_url= f"{loaded_config.discord_webhook_url}/messages/{message_id}", request_params= {'wait': 'true'})
     
     logging.debug("deleting message om discord with id: %s, response is %s",message_id, delete_request_to_discord)
 

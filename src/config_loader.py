@@ -17,7 +17,8 @@ default_config = {
         "replace_with":"nothing"
         }],
     "time_before_retry":60,
-    "max_errors_allowed":3
+    "max_errors_allowed":3,
+    "allow_failure": False
 }
 
 # loads config from file
