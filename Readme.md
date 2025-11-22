@@ -75,10 +75,18 @@ to exit out of the shell press crtl+p followed by ctrl+q to escape from the shel
 
 # FAQ
 
-## the bot crashed after i deleted a message from discord
+### the bot crashed after i deleted a message from discord
 The bot expects to be able to manipulate the messages it created, if they no longer exsist the bot will try to change or delete the message a set amount of times and then crash.
 
 To fix: go to your bots config folder and delete all files in config/embeds, delete all exsisting messages in discord and restart the bot
+
+### if i put @everyone into the message_before_embed entry in the config the bot crashes
+@ is used by yaml for other things, enclose the message in qoutes or double qoutes to fix
+
+example
+```
+message_before_embed: "@everyone im live!"
+```
 
 # disclaimer
 Scripts are written by an amateur, use at your own risk
