@@ -2,9 +2,9 @@ import yaml
 import logging
 
 default_config = {
-    "twitch_api_id":"",
-    "twitch_api_secret":"",
-    "discord_webhook_url":"",
+    "twitch_api_id":"YOUR_API_ID",
+    "twitch_api_secret":"YOUR_API_SECRET",
+    "discord_webhook_url":"YOUR_WEBHOOK_URL",
     "poll_interval":10,
     "allowed_categories":[],
     "message_before_embed":"",
