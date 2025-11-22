@@ -71,7 +71,14 @@ and then you excecute the script with the command
 ```
 python src/get_user_id.py
 ```
-to exit out of the shell press crtl+p followed by ctrl+q to escape from the shell   
+to exit out of the shell press crtl+p followed by ctrl+q to escape from the shell
+
+# FAQ
+
+## the bot crashed after i deleted a message from discord
+The bot expects to be able to manipulate the messages it created, if they no longer exsist the bot will try to change or delete the message a set amount of times and then crash.
+
+To fix: go to your bots config folder and delete all files in config/embeds, delete all exsisting messages in discord and restart the bot
 
 # disclaimer
 Scripts are written by an amateur, use at your own risk
