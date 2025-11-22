@@ -20,5 +20,5 @@ handlers:
     encoding: utf-8
 
 root:
-  level: DEBUG # change this value to DEBUG for debugging messages in log
+  level: INFO # change this value to DEBUG for debugging messages in log
   handlers: [console, file]
