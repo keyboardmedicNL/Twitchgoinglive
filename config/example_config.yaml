@@ -10,6 +10,7 @@ discord_webhook_url: YOUR_WEBHOOK_URL # webhook url from discord to post going l
 #- music
 #message_before_embed: this is a message that shows above the embed # a custom message to show above the going live embed message, add <username> in the string to add the streamers name to the message. Can be used to ping roles or users DEFAULT ""
 #use_offline_messages: false # wether or not the bot should delete the message when someone goes offline or should display an offline message instead DEFAULT false
+#leave_messages_untouched: false #copies streamcords default behaviour where after a user goes offline the message remains as it did when they were last live
 #team_name: YOUR_TEAM_NAME # add the name of a twitch team to use the list of members in a twitch team to check instead of streamers.txt
 #excluded_uids: # list of uids to exclude from the bot, usefull if you poll an entire team and want to leave out certain members of team
 # - 123456

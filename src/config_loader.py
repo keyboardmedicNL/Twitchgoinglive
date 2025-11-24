@@ -18,7 +18,8 @@ default_config = {
         }],
     "time_before_retry":60,
     "max_errors_allowed":3,
-    "allow_failure": False
+    "allow_failure": False,
+    "leave_messages_untouched": False
 }
 
 # loads config from file

@@ -55,7 +55,7 @@ def create_embeds_folder():
         os.makedirs("config/embeds")
         logging.debug('embed folder was not found so it was created')
 
-def clean_up_old_embeds(use_offline_message: bool):
+def clean_up_old_embeds(use_offline_message: bool,leave_messages_untouched:bool):
     for filename in os.listdir("config/embeds"):
 
         filename = filename.replace(".txt","")
@@ -63,7 +63,7 @@ def clean_up_old_embeds(use_offline_message: bool):
 
         if use_offline_message:
             discord_webhook_edit_to_offline(message_id_from_file, name_from_file, embed_color, username_from_file)
-        else:
+        elif not leave_messages_untouched:
             discord_webhook_delete(message_id_from_file)
 
         remove_message_id_file(filename)
@@ -83,7 +83,7 @@ def main():
 
     create_embeds_folder()
     
-    clean_up_old_embeds( loaded_config.use_offline_messages)
+    clean_up_old_embeds( loaded_config.use_offline_messages, loaded_config.leave_messages_untouched)
 
     token_from_twitch = get_token_from_twitch_api()
 
@@ -130,7 +130,7 @@ def main():
                         
                         if loaded_config.use_offline_messages:
                             discord_webhook_edit_to_offline(message_id_from_file, name_from_file, embed_color, username_from_file)
-                        else:
+                        elif not loaded_config.leave_messages_untouched:
                             discord_webhook_delete(message_id_from_file)
                         remove_message_id_file(streamer)
         
