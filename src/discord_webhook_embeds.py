@@ -12,9 +12,10 @@ handle_request_error = requests_error_handler.handle_request_error
 pick_random_color = color_picker.pick_random_color
 
 sanitize_username = sky_bass_functions.sanitize_streamer_username
+per_streamer_message = sky_bass_functions.per_streamer_message
 
 def parse_data_for_webhook(streamer_data: dict, color: str) -> tuple[dict, str]:
-
+    
     username = streamer_data["data"][0]["user_name"]
     user = streamer_data["data"][0]["user_login"]
     title = streamer_data["data"][0]["title"]
@@ -28,6 +29,8 @@ def parse_data_for_webhook(streamer_data: dict, color: str) -> tuple[dict, str]:
 
     if loaded_config.use_skybass:
         username = sanitize_username(username, loaded_config.names_to_ignore)
+        
+        
 
     message_before_embed = parse_username_for_embed(username)
 
@@ -72,6 +75,8 @@ def parse_data_for_webhook(streamer_data: dict, color: str) -> tuple[dict, str]:
 def parse_username_for_embed(username: str) -> str:
 
     message_before_embed = loaded_config.message_before_embed
+
+    message_before_embed = per_streamer_message(username, loaded_config.names_to_ignore, message_before_embed)
 
     if "<username>" in message_before_embed:
         message_with_username = message_before_embed.replace("<username>", username)
@@ -122,7 +127,7 @@ def discord_webhook_delete(message_id: str):
 
 def discord_webhook_edit_to_offline(message_id: str ,filename: str, embed_color: str, username: str):
 
-    message_before_embed = parse_username_for_embed(username)
+    message_before_embed = parse_username_for_embed(username,)
 
     data_to_send_to_webhook = {"content": message_before_embed, "embeds": [
             {
