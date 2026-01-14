@@ -46,8 +46,10 @@ discord_webhook_url: YOUR_WEBHOOK_URL # webhook url from discord to post going l
 #names_to_ignore: # list of dicts of usernames to ignore for filtering by sky bass functions that remove dnb, dj, vox or music from the username for embed message
 #- name: "ApocDnB"
 #  replace_with: "Zach and Apoc"
+#  message: "this message will replace the message define in message_before_embed for this user"
 #- name: "dj_Acidion"
 #  replace_with: "Acidman"
+#  message: "this message will replace the message define in message_before_embed for this user"
 ```
 
 5. create a streamers.txt file in the config folder and add the user id of every streamer you want to poll on a new line, alternativly add a url to a txt file that contains the list to poll (if you dont have the user id you can use https://www.streamweasels.com/tools/convert-twitch-username-to-user-id/ to get the id from the twitch api, alternativly there is a included getuserid.py script you can run in a terminal to get it yourself from the api)
