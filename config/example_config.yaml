@@ -1,30 +1,54 @@
 # REQUIRED PARAMETERS
 twitch_api_id: YOUR_API_ID # your twitch api id
 twitch_api_secret: YOUR_API_SECRET # your twitch api secret
-discord_webhook_url: YOUR_WEBHOOK_URL # webhook url from discord to post going live messages to
 
-# everything below this is optional, uncomment the line (remove the #) if you want to use it
+# OPTIONAL PARAMETERS
+
 #poll_interval: 10 # time in minutes on how often the script should check if anyone is live DEFAULT: 10 minutes
-#allowed_categories: # a list of allowed categories your streamers need to be in for the bot to show a going live message DEFAULT all categories allowed
-#- djs
-#- music
-#message_before_embed: this is a message that shows above the embed # a custom message to show above the going live embed message, add <username> in the string to add the streamers name to the message. Can be used to ping roles or users DEFAULT ""
-#use_offline_messages: false # wether or not the bot should delete the message when someone goes offline or should display an offline message instead DEFAULT false
-#leave_messages_untouched: false #copies streamcords default behaviour where after a user goes offline the message remains as it did when they were last live
-#team_name: YOUR_TEAM_NAME # add the name of a twitch team to use the list of members in a twitch team to check instead of streamers.txt
-#excluded_uids: # list of uids to exclude from the bot, usefull if you poll an entire team and want to leave out certain members of team
-# - 123456
-# - 234567
 #max_errors_allowed: 3 # the amount of times the bot will retry a http request when it runs into an error performing it
 #time_before_retry: 60 # time in seconds between retry attempts for errored out http requests
 #allow_failure: true or false # allows manual deletion of messages without causing an exception unless use_offline_messages is also used, Leaving this off will provide better error handling
 
-# sky bass functions: a set of slightly obscure entries used in slightly obscure functions for use on the sky bass discord
-#use_skybass: true # enables use of functions specificly written for the sky bass discord
-#names_to_ignore: # list of dicts of usernames to ignore for filtering by sky bass functions that remove dnb, dj, vox or music from the username for embed message
-#- name: "ApocDnB"
-#  replace_with: "Zach and Apoc"
-#  message: "this message will replace the message define in message_before_embed for this user"
-#- name: "dj_Acidion"
-#  replace_with: "Acidman"
-#  message: "this message will replace the message define in message_before_embed for this user"
+# REQUIRED PARAMETERS
+
+shoutouts:
+
+  # first discord webhook to handle
+- discord_webhook_url: your_webhook_url
+  streamers: # list of streamers uuid's to check, can be a list of integers OR a link to a file containing the uuids with a new entry on each line
+  - 123456789 # streamers uuid
+  - https://link_to_your_list_of_streamers_file/ #link to a raw file with a list of streamer uuid's
+
+  # OPTIONAL PARAMETERS
+
+  #message_before_embed: this is a message that shows above the embed # a custom message to show above the going live embed message, add <username> in the string to add the streamers name to the message. Can be used to ping roles or users DEFAULT ""
+  
+  #use_offline_messages: false # wether or not the bot should delete the message when someone goes offline or should display an offline message instead DEFAULT false
+  #leave_messages_untouched: false #copies streamcords default behaviour where after a user goes offline the message remains as it did when they were last live
+  
+  #team_name: YOUR_TEAM_NAME # add the name of a twitch team to use the list of members in a twitch team to check instead of streamers the streamers list
+  
+  #excluded_uids: # list of uids to exclude from the bot, usefull if you poll an entire team and want to leave out certain members of team
+  # - 123456
+  # - 234567
+  
+  #allowed_categories: # a list of allowed categories your streamers need to be in for the bot to show a going live message DEFAULT all categories allowed
+  #- djs
+  #- music
+  
+  # sky bass functions: a set of slightly obscure entries used in slightly obscure functions for use on the sky bass discord
+  #use_skybass: true # enables use of functions specificly written for the sky bass discord 
+  #names_to_ignore: # list of dicts of usernames to ignore for filtering by sky bass functions that remove dnb, dj, vox or music from the username for embed message
+  #- name: "ApocDnB"
+  #  replace_with: "Zach and Apoc"
+  #  message: "this message will replace the message define in message_before_embed for this user"
+  #- name: "dj_Acidion"
+  #  replace_with: "Acidman"
+  #  message: "this message will replace the message define in message_before_embed for this user" 
+
+
+  # second discord webhook to handle
+#- discord_webhook_url: your_webhook_url
+#  streamers:
+#  - 123456789
+#  - 2345678910

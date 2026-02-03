@@ -4,8 +4,15 @@ import logging
 default_config = {
     "twitch_api_id":"YOUR_API_ID",
     "twitch_api_secret":"YOUR_API_SECRET",
-    "discord_webhook_url":"YOUR_WEBHOOK_URL",
     "poll_interval":10,
+    "time_before_retry":60,
+    "max_errors_allowed":3,
+    "allow_failure": False
+}
+
+per_discord_config = {
+    "discord_webhook_url":"YOUR_WEBHOOK_URL",
+    "streamers":[],
     "allowed_categories":[],
     "message_before_embed":"",
     "use_offline_messages":False,
@@ -16,22 +23,24 @@ default_config = {
         "name":"name",
         "replace_with":"nothing"
         }],
-    "time_before_retry":60,
-    "max_errors_allowed":3,
-    "allow_failure": False,
     "leave_messages_untouched": False
 }
 
 # loads config from file
 def load_config() -> dict:
+    shoutouts = []
     with open("config/config.yaml") as config_file:
         config_yaml = yaml.safe_load(config_file)
-        merged_config = config_object({**default_config, **config_yaml})
-    if merged_config.twitch_api_id == "YOUR_API_ID" or merged_config.twitch_api_secret == "YOUR_API_SECRET" or merged_config.discord_webhook_url == "YOUR_WEBHOOK_URL":
-        raise RuntimeError("you are missing required values in your config. please fill them in and try again")
-    else:
-        logging.debug("succesfully loaded config")       
-        return(merged_config)
+
+    for per_config in config_yaml["shoutouts"]:
+        merged_per_config = per_discord_config | per_config
+        shoutouts.append(merged_per_config)
+
+    merged_config = config_object({**default_config, **config_yaml})
+    del merged_config.shoutouts
+
+    logging.debug("succesfully loaded config")       
+    return(merged_config, shoutouts)
 
 
 class config_object:

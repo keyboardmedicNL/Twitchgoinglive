@@ -5,7 +5,7 @@ import requests_error_handler
 import color_picker
 import sky_bass_functions
 
-loaded_config = config_loader.load_config()
+loaded_config, _ = config_loader.load_config()
 
 handle_request_error = requests_error_handler.handle_request_error
 
@@ -14,7 +14,7 @@ pick_random_color = color_picker.pick_random_color
 sanitize_username = sky_bass_functions.sanitize_streamer_username
 per_streamer_message = sky_bass_functions.per_streamer_message
 
-def parse_data_for_webhook(streamer_data: dict, color: str) -> tuple[dict, str]:
+def parse_data_for_webhook(streamer_data: dict, color: str, entry: dict) -> tuple[dict, str]:
     
     username = streamer_data["data"][0]["user_name"]
     user = streamer_data["data"][0]["user_login"]
@@ -27,12 +27,12 @@ def parse_data_for_webhook(streamer_data: dict, color: str) -> tuple[dict, str]:
     if streamer_data["data"][0]["game_name"] == "":
         game = "none"
 
-    if loaded_config.use_skybass:
-        username = sanitize_username(username, loaded_config.names_to_ignore)
+    if entry["use_skybass"]:
+        username = sanitize_username(username, entry["names_to_ignore"])
         
         
 
-    message_before_embed = parse_username_for_embed(username)
+    message_before_embed = parse_username_for_embed(username, entry)
 
     data_to_send_to_webhook = {"content": message_before_embed,"embeds": [
                     {
@@ -72,11 +72,11 @@ def parse_data_for_webhook(streamer_data: dict, color: str) -> tuple[dict, str]:
     
     return(data_to_send_to_webhook, username)
 
-def parse_username_for_embed(username: str) -> str:
+def parse_username_for_embed(username: str, entry) -> str:
 
-    message_before_embed = loaded_config.message_before_embed
+    message_before_embed = entry["message_before_embed"]
 
-    message_before_embed = per_streamer_message(username, loaded_config.names_to_ignore, message_before_embed)
+    message_before_embed = per_streamer_message(username, entry["names_to_ignore"], message_before_embed)
 
     if "<username>" in message_before_embed:
         message_with_username = message_before_embed.replace("<username>", username)
@@ -86,13 +86,13 @@ def parse_username_for_embed(username: str) -> str:
     
     return(message_with_username)
 
-def discord_webhook_send(streamer_data: dict ) -> tuple[str ,str, str]:
+def discord_webhook_send(streamer_data: dict, entry: dict) -> tuple[str ,str, str]:
 
     color = str(pick_random_color("decimal"))
     
-    data_to_send_to_webhook, username = parse_data_for_webhook(streamer_data, color)
+    data_to_send_to_webhook, username = parse_data_for_webhook(streamer_data, color, entry)
 
-    send_request_to_discord = handle_request_error(request_type= "post", request_url= loaded_config.discord_webhook_url, request_json= data_to_send_to_webhook, request_params= {'wait': 'true'})
+    send_request_to_discord = handle_request_error(request_type= "post", request_url= entry["discord_webhook_url"], request_json= data_to_send_to_webhook, request_params= {'wait': 'true'})
 
     send_request_to_discord_json = send_request_to_discord.json()
     message_id = send_request_to_discord_json["id"]
@@ -101,33 +101,33 @@ def discord_webhook_send(streamer_data: dict ) -> tuple[str ,str, str]:
 
     return(message_id, color, username)
     
-def discord_webhook_edit(streamer_data: dict,message_id: str, embed_color: str):
+def discord_webhook_edit(streamer_data: dict,message_id: str, embed_color: str, entry: dict):
 
-    data_to_send_to_webhook, username = parse_data_for_webhook(streamer_data, embed_color)
+    data_to_send_to_webhook, username = parse_data_for_webhook(streamer_data, embed_color, entry)
     
     if loaded_config.allow_failure:
         status_types_to_pass = [200,404]
     else:
         status_types_to_pass = [200]
 
-    edit_request_to_discord = handle_request_error(status_type_ok=status_types_to_pass, request_type="patch", request_url= f"{loaded_config.discord_webhook_url}/messages/{message_id}", request_json= data_to_send_to_webhook, request_params= {'wait': 'true'})
+    edit_request_to_discord = handle_request_error(status_type_ok=status_types_to_pass, request_type="patch", request_url= f"{entry["discord_webhook_url"]}/messages/{message_id}", request_json= data_to_send_to_webhook, request_params= {'wait': 'true'})
     
     logging.debug("updating message to discord with id: %s for user %s, response is %s",message_id, username, edit_request_to_discord)
 
-def discord_webhook_delete(message_id: str):
+def discord_webhook_delete(message_id: str, entry: dict):
 
     if loaded_config.allow_failure:
         status_types_to_pass = [204,404]
     else:
         status_types_to_pass = [204]
 
-    delete_request_to_discord = handle_request_error(status_type_ok=status_types_to_pass ,request_type="delete", request_url= f"{loaded_config.discord_webhook_url}/messages/{message_id}", request_params= {'wait': 'true'})
+    delete_request_to_discord = handle_request_error(status_type_ok=status_types_to_pass ,request_type="delete", request_url= f"{entry["discord_webhook_url"]}/messages/{message_id}", request_params= {'wait': 'true'})
     
     logging.debug("deleting message om discord with id: %s, response is %s",message_id, delete_request_to_discord)
 
-def discord_webhook_edit_to_offline(message_id: str ,filename: str, embed_color: str, username: str):
+def discord_webhook_edit_to_offline(message_id: str ,filename: str, embed_color: str, username: str, entry: dict):
 
-    message_before_embed = parse_username_for_embed(username,)
+    message_before_embed = parse_username_for_embed(username, entry)
 
     data_to_send_to_webhook = {"content": message_before_embed, "embeds": [
             {
@@ -144,6 +144,6 @@ def discord_webhook_edit_to_offline(message_id: str ,filename: str, embed_color:
             }
         ]}
     
-    edit_to_offline_request_to_discord = handle_request_error(request_type="patch", request_url= f"{loaded_config.discord_webhook_url}/messages/{message_id}", request_json= data_to_send_to_webhook, request_params= {'wait': 'true'})
+    edit_to_offline_request_to_discord = handle_request_error(request_type="patch", request_url= f"{entry["discord_webhook_url"]}/messages/{message_id}", request_json= data_to_send_to_webhook, request_params= {'wait': 'true'})
 
     logging.debug("updating to offline message to discord with id: %s for %s, response is %s",message_id, filename, edit_to_offline_request_to_discord)

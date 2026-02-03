@@ -2,7 +2,7 @@ import config_loader
 import logging
 import requests_error_handler
 
-loaded_config = config_loader.load_config()
+loaded_config, _ = config_loader.load_config()
 
 handle_request_error = requests_error_handler.handle_request_error
 

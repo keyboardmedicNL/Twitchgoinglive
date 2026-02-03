@@ -3,7 +3,7 @@ import requests
 import time
 import config_loader
 
-loaded_config = config_loader.load_config()
+loaded_config, _ = config_loader.load_config()
 time_before_retry = loaded_config.time_before_retry
 max_errors_allowed = loaded_config.max_errors_allowed
 
