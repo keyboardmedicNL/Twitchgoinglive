@@ -35,7 +35,7 @@ def get_list_of_streamers(list_of_streamers: list, token_from_twitch: str, team_
     if not team_name:
 
         # gets list of streamers from streamers.txt
-        if "http" in list_of_streamers:
+        if "http" in str(list_of_streamers[0]):
             get_streamers_trough_request_response = handle_request_error(request_url= list_of_streamers[0])
             list_of_streamers = get_streamers_trough_request_response.text.splitlines()
      
@@ -111,7 +111,7 @@ def main():
                         get_stream_json_from_twitch_response,get_stream_json_from_twitch_data, is_live, stream_category, streamer_name = get_stream_json_from_twitch(streamer, token_from_twitch)
                     
                     # checks if streamer is in allowed categories or if allowed categories is empty
-                    if is_live and (stream_category.lower() in entry["allowed_categories"]) or len(entry["allowed_categories"])==0:
+                    if is_live and ((stream_category.lower() in entry["allowed_categories"]) or len(entry["allowed_categories"])==0):
                         
                         if stream_category.lower() in entry["allowed_categories"]:
                             logging.debug('%s for %s with name %s is found in allowed categories: %s', stream_category, streamer, streamer_name, entry["allowed_categories"])
