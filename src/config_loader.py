@@ -1,5 +1,6 @@
 import yaml
 import logging
+import os
 
 default_config = {
     "twitch_api_id":"YOUR_API_ID",
@@ -61,7 +62,7 @@ shoutout_keys = ["discord_webhook_url",
     "leave_messages_untouched"]
 
 # loads config from file
-def load_config() -> tuple[object,dict]:
+def load_config():
     shoutouts = []
     with open("config/config.yaml") as config_file:
         config_yaml = yaml.safe_load(config_file)
@@ -77,7 +78,9 @@ def load_config() -> tuple[object,dict]:
         return(merged_config, shoutouts)
 
     except KeyError:
-        convert_config(config_yaml)
+        return(convert_config(config_yaml))
+    except Exception as e:
+        raise RuntimeError(e)
 
 
 class config_object:
@@ -98,7 +101,17 @@ def convert_config(config_yaml: dict):
 
     new_config = old_default_config | new_shoutout_entry
 
-    print(old_default_config)
+    yaml_string = yaml.dump(new_config, sort_keys=False)
+    logging.debug(f"new yaml string to write:\n{yaml_string}")
+
+    os.rename('config/config.yaml', 'config/config.old.yaml')
+
+    with open ("config/config.yaml", "x") as yaml_file:
+        yaml_file.write(yaml_string)
+
+    logging.info("converted old config format to new format, saved old config in config.old.yaml")
+
+    return(load_config())
 
 def create_dict_from_keylist(config_dict: dict, list_of_keys: list) -> dict:
     created_dict = {}

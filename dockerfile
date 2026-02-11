@@ -1,10 +1,7 @@
-FROM python:3
+FROM ghcr.io/astral-sh/uv:latest
 
 WORKDIR /usr/src/app
 
-COPY requirements.txt ./
-RUN pip install --no-cache-dir -r requirements.txt
-
 COPY . .
 
-CMD [ "python", "./src/going_live.py" ]
+CMD [ "uv", "run" "src/going_live.py" ]
