@@ -2,10 +2,10 @@
 please...
 
 # important
-I have completely refactored the script, it now uses yaml instead of json for the config and i have removed a bunch of unneeded code. please start with a new config if your updating... the 2 different versions have been condenses to 1 simpler version
+I have completely refactored the script, it now uses yaml instead of json for the config and i have removed a bunch of unneeded code. please start with a new config if your updating... the 2 different versions have been condenses to 1 simpler version, the last update converts your old config to the new format automaticly on first run, your old config will be saved as config.old.yaml
 
 # what is it
-a simple script that polls a list of twitch channels and posts a message to a discord webhook when they are live with a thumbnail and such. updates the message on a predefined schedule and deletes message when the stream goes offline or changes it to an offline message, cleans up all old messages on restart to avoid double posts when the bot crashes.
+a simple script that polls a list of twitch channels and posts a message to a discord webhook when they are live with a thumbnail and such. updates the message on a predefined schedule and deletes message when the stream goes offline or changes it to an offline message, cleans up all old messages on restart to avoid double posts when the bot crashes. it can now handle multiple discord webhooks in a single instance!
 
 ![Alt text](screenshot.png?raw=true "Title")
 
@@ -20,44 +20,66 @@ a simple script that polls a list of twitch channels and posts a message to a di
 
 ```
 # REQUIRED PARAMETERS
-# REQUIRED PARAMETERS
 twitch_api_id: YOUR_API_ID # your twitch api id
 twitch_api_secret: YOUR_API_SECRET # your twitch api secret
-discord_webhook_url: YOUR_WEBHOOK_URL # webhook url from discord to post going live messages to
 
-# everything below this is optional, uncomment the line (remove the #) if you want to use it
+# OPTIONAL PARAMETERS
+
 #poll_interval: 10 # time in minutes on how often the script should check if anyone is live DEFAULT: 10 minutes
-#allowed_categories: # a list of allowed categories your streamers need to be in for the bot to show a going live message DEFAULT all categories allowed
-#- djs
-#- music
-#message_before_embed: this is a message that shows above the embed # a custom message to show above the going live embed message, add <username> in the string to add the streamers name to the message. Can be used to ping roles or users DEFAULT ""
-#use_offline_messages: false # wether or not the bot should delete the message when someone goes offline or should display an offline message instead DEFAULT false
-#leave_messages_untouched: false #copies streamcords default behaviour where after a user goes offline the message remains as it did when they were last live
-#team_name: YOUR_TEAM_NAME # add the name of a twitch team to use the list of members in a twitch team to check instead of streamers.txt
-#excluded_uids: # list of uids to exclude from the bot, usefull if you poll an entire team and want to leave out certain members of team
-# - 123456
-# - 234567
 #max_errors_allowed: 3 # the amount of times the bot will retry a http request when it runs into an error performing it
 #time_before_retry: 60 # time in seconds between retry attempts for errored out http requests
 #allow_failure: true or false # allows manual deletion of messages without causing an exception unless use_offline_messages is also used, Leaving this off will provide better error handling
 
-# sky bass functions: a set of slightly obscure entries used in slightly obscure functions for use on the sky bass discord
-#use_skybass: true # enables use of functions specificly written for the sky bass discord
-#names_to_ignore: # list of dicts of usernames to ignore for filtering by sky bass functions that remove dnb, dj, vox or music from the username for embed message
-#- name: "ApocDnB"
-#  replace_with: "Zach and Apoc"
-#  message: "this message will replace the message define in message_before_embed for this user"
-#- name: "dj_Acidion"
-#  replace_with: "Acidman"
-#  message: "this message will replace the message define in message_before_embed for this user"
+# REQUIRED PARAMETERS
+
+shoutouts:
+
+  # first discord webhook to handle
+- discord_webhook_url: your_webhook_url
+  streamers: # list of streamers uuid's to check, can be a list of integers OR a link to a file containing the uuids with a new entry on each line
+  - 123456789 # streamers uuid
+  - https://link_to_your_list_of_streamers_file/ #link to a raw file with a list of streamer uuid's
+
+  # OPTIONAL PARAMETERS
+
+  #message_before_embed: this is a message that shows above the embed # a custom message to show above the going live embed message, add <username> in the string to add the streamers name to the message. Can be used to ping roles or users DEFAULT ""
+  
+  #use_offline_messages: false # wether or not the bot should delete the message when someone goes offline or should display an offline message instead DEFAULT false
+  #leave_messages_untouched: false #copies streamcords default behaviour where after a user goes offline the message remains as it did when they were last live
+  
+  #team_name: YOUR_TEAM_NAME # add the name of a twitch team to use the list of members in a twitch team to check instead of streamers the streamers list
+  
+  #excluded_uids: # list of uids to exclude from the bot, usefull if you poll an entire team and want to leave out certain members of team
+  # - 123456
+  # - 234567
+  
+  #allowed_categories: # a list of allowed categories your streamers need to be in for the bot to show a going live message DEFAULT all categories allowed
+  #- djs
+  #- music
+  
+  # sky bass functions: a set of slightly obscure entries used in slightly obscure functions for use on the sky bass discord
+  #use_skybass: true # enables use of functions specificly written for the sky bass discord 
+  #names_to_ignore: # list of dicts of usernames to ignore for filtering by sky bass functions that remove dnb, dj, vox or music from the username for embed message
+  #- name: "ApocDnB"
+  #  replace_with: "Zach and Apoc"
+  #  message: "this message will replace the message define in message_before_embed for this user"
+  #- name: "dj_Acidion"
+  #  replace_with: "Acidman"
+  #  message: "this message will replace the message define in message_before_embed for this user" 
+
+
+  # second discord webhook to handle
+#- discord_webhook_url: your_webhook_url
+#  streamers:
+#  - 123456789
+#  - 2345678910
 ```
 
-5. create a streamers.txt file in the config folder and add the user id of every streamer you want to poll on a new line, alternativly add a url to a txt file that contains the list to poll (if you dont have the user id you can use https://www.streamweasels.com/tools/convert-twitch-username-to-user-id/ to get the id from the twitch api, alternativly there is a included getuserid.py script you can run in a terminal to get it yourself from the api)
-```
-123456
-234567
-345678
-```
+5. install the dependencies in the requirements.txt, ideally you use a virtual enviroment for this... to do so
+    1. on linux python-venv is a seperate package and needs to be installed first.
+    2. in the root of this project run ```python3 -m venv .env``` then use ```source .env/bin/active``` to activate your virtual enviroment
+    3. you can now install the dependencies with ```pip install -r requirements```
+
 6. run the script:   
 on windows: with the included start.bat file
 on linux: in a terminal with ```python src/going_live.py```
@@ -76,6 +98,17 @@ and then you excecute the script with the command
 python src/get_user_id.py
 ```
 to exit out of the shell press crtl+p followed by ctrl+q to escape from the shell
+
+or using docker compose:
+```
+name: twitchgoinglive
+
+services:
+    twitchgoinglive:
+        image: keyboardmedic/twitchgoinglive:latest
+        volumes:
+         - /path/to/your/config/folder:/usr/src/app/config
+```
 
 # FAQ
 
