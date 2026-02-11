@@ -9,3 +9,6 @@ logs
 __pychace__
 test*
 going_live.log
+.vscode
+config.*.yaml
+.env
