@@ -1,6 +1,3 @@
-# Download the script from releases do NOT just clone the repo
-please...
-
 # important
 I have completely refactored the script, it now uses yaml instead of json for the config and i have removed a bunch of unneeded code. please start with a new config if your updating... the 2 different versions have been condenses to 1 simpler version, the last update converts your old config to the new format automaticly on first run, your old config will be saved as config.old.yaml
 
