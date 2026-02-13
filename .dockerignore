@@ -11,4 +11,4 @@ test*
 going_live.log
 .vscode
 config.*.yaml
-.venv
+.env
