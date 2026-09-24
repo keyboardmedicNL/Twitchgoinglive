@@ -36,28 +36,28 @@ shoutouts:
   #- djs
   #- music
   
-  # sky bass functions: a set of slightly obscure entries used in slightly obscure functions for use on the sky bass discord
-  #use_skybass: true # enables use of functions specificly written for the sky bass discord 
-  #extended_config: # list of dicts of usernames to ignore for filtering by sky bass functions that remove dnb, dj, vox or music from the username for embed message
-  #- name: "ApocDnB"
-  #  replace_with: "Zach and Apoc"
+  #use_skybass: true # enables sanitizing usernames for embeds and messages, removes the following strings "dj" "dnb" "vox" "music" 
+  #extended_config: # list of dicts of user for filtering based on category and adding custom messages per user
+  #- name: "ApocDnB" # streamers username
+  #  replace_with: "Zach and Apoc" # new name that will be displayed in the embeds and message instead of the users actual name
   #  message: "this message will replace the message define in message_before_embed for this user"
   #  categories:
-  #      - name: "Music"
-  #        message: "ehmahgerd <username> is playin music"
-  #      - name: "Swat4"
-  #        message: "ehmahgerd <username> is  playin swat4"
-  #- name: "dj_Acidion"
-  #  replace_with: "Acidman"
+  #      - name: "Music" # category to display a custom message for, not case sensitive
+  #        message: "this message will be shown if the above define user is live in the category defined above"
+  #      - name: "Swat 4" # category to display a custom message for, not case sensitive
+  #        message "this message will be shown if the above define user is live in the category defined above"
+  #- name: "dj_Acidion" # streamers username
+  #  replace_with: "Acidman" # new name that will be displayed in the embeds and message instead of the users actual name 
   #  message: "this message will replace the message define in message_before_embed for this user"
   #  categories:
-  #      - name: "Music"
-  #        message: "ehmahgerd <username> is playin music"
-  #      - name: "Swat4"
-  #        message: "ehmahgerd <username> is  playin swat4"
+  #      - name: "Music" # category to display a custom message for, not case sensitive
+  #        message: "this message will be shown if the above define user is live in the category defined above"
+  #      - name: "Swat 4" # category to display a custom message for, not case sensitive
+  #        message: "this message will be shown if the above define user is live in the category defined above"
 
 
-  # second discord webhook to handle
+
+# second discord webhook to handle
 #- discord_webhook_url: your_webhook_url
 #  streamers:
 #  - 123456789
