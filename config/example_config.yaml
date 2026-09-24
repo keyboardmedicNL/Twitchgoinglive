@@ -38,13 +38,23 @@ shoutouts:
   
   # sky bass functions: a set of slightly obscure entries used in slightly obscure functions for use on the sky bass discord
   #use_skybass: true # enables use of functions specificly written for the sky bass discord 
-  #names_to_ignore: # list of dicts of usernames to ignore for filtering by sky bass functions that remove dnb, dj, vox or music from the username for embed message
+  #extended_config: # list of dicts of usernames to ignore for filtering by sky bass functions that remove dnb, dj, vox or music from the username for embed message
   #- name: "ApocDnB"
   #  replace_with: "Zach and Apoc"
   #  message: "this message will replace the message define in message_before_embed for this user"
+  #  categories:
+  #      - name: "Music"
+  #        message: "ehmahgerd <username> is playin music"
+  #      - name: "Swat4"
+  #        message: "ehmahgerd <username> is  playin swat4"
   #- name: "dj_Acidion"
   #  replace_with: "Acidman"
-  #  message: "this message will replace the message define in message_before_embed for this user" 
+  #  message: "this message will replace the message define in message_before_embed for this user"
+  #  categories:
+  #      - name: "Music"
+  #        message: "ehmahgerd <username> is playin music"
+  #      - name: "Swat4"
+  #        message: "ehmahgerd <username> is  playin swat4"
 
 
   # second discord webhook to handle

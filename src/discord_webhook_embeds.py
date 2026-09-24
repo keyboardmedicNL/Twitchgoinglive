@@ -27,16 +27,13 @@ def parse_data_for_webhook(streamer_data: dict, color: str, entry: dict) -> tupl
     if streamer_data["data"][0]["game_name"] == "":
         game = "none"
 
-    if entry["use_skybass"]:
-        username = sanitize_username(username, entry["names_to_ignore"])
+    sanitized_username = sanitize_username(username, entry["extended_config"], entry["use_skybass"])
         
-        
-
-    message_before_embed = parse_username_for_embed(username, entry)
+    message_before_embed = parse_username_for_embed(username, sanitized_username, entry, game)
 
     data_to_send_to_webhook = {"content": message_before_embed,"embeds": [
                     {
-                    "title": f":red_circle: {username} is now live!",
+                    "title": f":red_circle: {sanitized_username} is now live!",
                     "description": title,
                     "url": f"https://www.twitch.tv/{user}",
                     "color": color,
@@ -70,16 +67,16 @@ def parse_data_for_webhook(streamer_data: dict, color: str, entry: dict) -> tupl
                     }
                 ]}
     
-    return(data_to_send_to_webhook, username)
+    return(data_to_send_to_webhook, sanitized_username)
 
-def parse_username_for_embed(username: str, entry) -> str:
+def parse_username_for_embed(username: str, sanitized_username: str, entry, game: str) -> str:
 
     message_before_embed = entry["message_before_embed"]
 
-    message_before_embed = per_streamer_message(username, entry["names_to_ignore"], message_before_embed)
+    message_before_embed = per_streamer_message(username, entry["extended_config"], message_before_embed, game)
 
     if "<username>" in message_before_embed:
-        message_with_username = message_before_embed.replace("<username>", username)
+        message_with_username = message_before_embed.replace("<username>", sanitized_username)
 
     else:
         message_with_username = message_before_embed
@@ -127,9 +124,8 @@ def discord_webhook_delete(message_id: str, entry: dict):
 
 def discord_webhook_edit_to_offline(message_id: str ,filename: str, embed_color: str, username: str, entry: dict):
 
-    message_before_embed = parse_username_for_embed(username, entry)
 
-    data_to_send_to_webhook = {"content": message_before_embed, "embeds": [
+    data_to_send_to_webhook = {"content": "", "embeds": [
             {
             "title": f":x: {filename} has gone offline!",
             "description": "",
