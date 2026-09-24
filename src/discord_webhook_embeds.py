@@ -122,14 +122,14 @@ def discord_webhook_delete(message_id: str, entry: dict):
     
     logging.debug("deleting message om discord with id: %s, response is %s",message_id, delete_request_to_discord)
 
-def discord_webhook_edit_to_offline(message_id: str ,filename: str, embed_color: str, username: str, entry: dict):
+def discord_webhook_edit_to_offline(message_id: str ,sanitized_username_from_file: str, embed_color: str, username: str, entry: dict):
 
 
     data_to_send_to_webhook = {"content": "", "embeds": [
             {
-            "title": f":x: {filename} has gone offline!",
+            "title": f":x: {sanitized_username_from_file} has gone offline!",
             "description": "",
-            "url": f"https://www.twitch.tv/{filename.lower()}",
+            "url": f"https://www.twitch.tv/{username.lower()}",
             "color": embed_color,
             "fields": [
                 {
@@ -142,4 +142,4 @@ def discord_webhook_edit_to_offline(message_id: str ,filename: str, embed_color:
     
     edit_to_offline_request_to_discord = handle_request_error(request_type="patch", request_url= f"{entry["discord_webhook_url"]}/messages/{message_id}", request_json= data_to_send_to_webhook, request_params= {'wait': 'true'})
 
-    logging.debug("updating to offline message to discord with id: %s for %s, response is %s",message_id, filename, edit_to_offline_request_to_discord)
+    logging.debug("updating to offline message to discord with id: %s for %s, response is %s",message_id, sanitized_username_from_file, edit_to_offline_request_to_discord)

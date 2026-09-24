@@ -123,8 +123,8 @@ def main():
                             discord_webhook_edit(get_stream_json_from_twitch_data, message_id_from_file, embed_color, entry)
                         else:
                             logging.debug('no embed exsists for %s with name %s, creating it',streamer, streamer_name)
-                            message_id, embed_color, streamer_user_name = discord_webhook_send(get_stream_json_from_twitch_data, entry)
-                            save_message_id_to_file(streamer, i, message_id, streamer_name, embed_color, streamer_user_name)
+                            message_id, embed_color, sanitized_username = discord_webhook_send(get_stream_json_from_twitch_data, entry)
+                            save_message_id_to_file(streamer, i, message_id, streamer_name, embed_color, sanitized_username)
                     
                     else:
                         # removes embed if offline or uses offline message
