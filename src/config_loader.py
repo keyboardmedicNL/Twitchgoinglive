@@ -20,10 +20,10 @@ per_discord_config = {
     "team_name": "",
     "excluded_uids":[],
     "use_skybass": False,
-    "names_to_ignore": [{
-        "name":"name",
-        "replace_with":"nothing"
-        }],
+    "extended_config": [{
+        "name": "name",
+        "replace_with": "nothing"
+    }],
     "leave_messages_untouched": False
 }
 

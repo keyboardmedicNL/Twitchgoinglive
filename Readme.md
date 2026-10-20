@@ -1,6 +1,6 @@
 # important
 I have completely refactored the script, it now uses yaml instead of json for the config and i have removed a bunch of unneeded code. please start with a new config if your updating... the 2 different versions have been condenses to 1 simpler version, the last update converts your old config to the new format automaticly on first run, your old config will be saved as config.old.yaml
-
+If you previously used the sky bass functions (highly unlikely, pretty sure im the only one that uses it) some config entries have been renamed, check the example below
 # what is it
 a simple script that polls a list of twitch channels and posts a message to a discord webhook when they are live with a thumbnail and such. updates the message on a predefined schedule and deletes message when the stream goes offline or changes it to an offline message, cleans up all old messages on restart to avoid double posts when the bot crashes. it can now handle multiple discord webhooks in a single instance!
 
@@ -54,22 +54,33 @@ shoutouts:
   #- djs
   #- music
   
-  # sky bass functions: a set of slightly obscure entries used in slightly obscure functions for use on the sky bass discord
-  #use_skybass: true # enables use of functions specificly written for the sky bass discord 
-  #names_to_ignore: # list of dicts of usernames to ignore for filtering by sky bass functions that remove dnb, dj, vox or music from the username for embed message
-  #- name: "ApocDnB"
-  #  replace_with: "Zach and Apoc"
+  #use_skybass: true # enables sanitizing usernames for embeds and messages, removes the following strings "dj" "dnb" "vox" "music" 
+  #extended_config: # list of dicts of user for filtering based on category and adding custom messages per user
+  #- name: "ApocDnB" # streamers username
+  #  replace_with: "Zach and Apoc" # new name that will be displayed in the embeds and message instead of the users actual name
   #  message: "this message will replace the message define in message_before_embed for this user"
-  #- name: "dj_Acidion"
-  #  replace_with: "Acidman"
-  #  message: "this message will replace the message define in message_before_embed for this user" 
+  #  categories:
+  #      - name: "Music" # category to display a custom message for, not case sensitive
+  #        message: "this message will be shown if the above define user is live in the category defined above"
+  #      - name: "Swat 4" # category to display a custom message for, not case sensitive
+  #        message "this message will be shown if the above define user is live in the category defined above"
+  #- name: "dj_Acidion" # streamers username
+  #  replace_with: "Acidman" # new name that will be displayed in the embeds and message instead of the users actual name 
+  #  message: "this message will replace the message define in message_before_embed for this user"
+  #  categories:
+  #      - name: "Music" # category to display a custom message for, not case sensitive
+  #        message: "this message will be shown if the above define user is live in the category defined above"
+  #      - name: "Swat 4" # category to display a custom message for, not case sensitive
+  #        message: "this message will be shown if the above define user is live in the category defined above"
 
 
-  # second discord webhook to handle
+
+# second discord webhook to handle
 #- discord_webhook_url: your_webhook_url
 #  streamers:
 #  - 123456789
 #  - 2345678910
+
 ```
 
 5. install the dependencies in the requirements.txt, ideally you use a virtual enviroment for this... to do so
